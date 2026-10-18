@@ -54,3 +54,8 @@ The engine/application script passed **104 / 104**. Additional browser behavior 
 ## Scope and honesty
 
 This is a local-first scientific calculator and rules-based math tutor. An external AI can drive it through browser automation, but the page does not itself contain an LLM. Local browser state belongs to that browser and origin; moving devices requires a transferred backup, not merely a URL. Keeping this distinction in public documentation makes both the software and its benchmark numbers reproducible.
+
+
+## Mr. E teaching and benchmark imports
+
+`index.html` now contains `MRE_FUNCTIONS` (function reference), `MRE_TOPICS` (lessons), `mreGraphExplain`, `mrePracticeStart`, `mreBenchmarkExplanation`, and `mreTutor`. The older explicit command tutor is wrapped rather than replaced, keeping existing `solve`, `differentiate`, `integrate`, `plot`, and `recall` behavior. Maintain the app as a self-contained HTML file; imported benchmark JSON is read as local data only and has size, ID, and uniqueness checks. Keep answer rendering through `textContent`. Tests: `node tests/mr-e-checks.cjs`; documentation: [MR-E.md](MR-E.md).
