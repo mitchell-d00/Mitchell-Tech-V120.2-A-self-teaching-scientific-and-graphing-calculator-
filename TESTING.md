@@ -74,3 +74,10 @@ node tests/application-checks.cjs
 ```
 
 The first command writes `tests/full-spectrum-results.json`. The app itself still runs entirely from `index.html`, with no Node.js requirement.
+
+
+## 18 October 2026 — deduplicated extended benchmarks
+
+A later review of the supplied benchmark ZIP and the current repository source found **two duplicated expression prompts** in the fixed corpus. The new `tests/unique-benchmarks.cjs` runner executes **22,226 distinct questions**, reporting **22,224 passing and two failing** DEG-mode cases. Each question receives a stable ID, duplicates are explicitly excluded, and the generated cases have a fixed seed. The original pre-deduplication 2,205/2,205 figure above remains a *historical* result, not the new unique count.
+
+The confirmed failures are `atan2(1,2)` returning radians in DEG mode and `tan(270)` producing a huge finite number at an undefined tangent. Source-level tests and seven Chromium UI checks succeeded otherwise, but the **live GitHub Pages JavaScript was not run through browser automation in this session**. See [BENCHMARKS.md](BENCHMARKS.md) for complete scope, repeatable commands, sources, and limitations.
