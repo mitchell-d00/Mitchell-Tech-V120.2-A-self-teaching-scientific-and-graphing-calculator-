@@ -193,3 +193,8 @@ See `TESTING.md` for the live-browser findings, corrected defects and verificati
 ## License
 
 MIT. See `LICENSE`.
+
+
+## Reproducible benchmarks
+
+For the latest **globally deduplicated** mathematical and offline-tutor drills, see [BENCHMARKS.md](BENCHMARKS.md). The extended Node.js runner is `node tests/unique-benchmarks.cjs`; it writes one result per distinct question to `tests/unique-benchmarks-results.json` and uses a fixed random seed. On 18 October 2026, **22,224 / 22,226** unique questions passed; two degree-mode edge cases remain documented failures. The calculator itself does not need Node.js to run.
