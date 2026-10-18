@@ -1,5 +1,15 @@
 # Unique-question benchmark report — 18 October 2026
 
+## Current verified status — correction release (18 October 2026)
+
+**22,242 / 22,242 globally unique mathematical and offline-tutor questions passed** (including 16 newly added, individually identified precision and symbolic-clarity regressions); only two duplicate *raw expressions* were excluded. The bundled engine/application check suite passed **104 / 104**. A separate Chromium run of the updated HTML passed **22 / 22** checks at 390px and 1366px (including calculator-first layout, exact trig-zero displays, undefined tangent, cleaner `x^x` tutor steps, and JS errors). The browser run used `page.set_content`, so **origin-bound storage after a real reload and the deployed GitHub Pages site were not reverified**.
+
+Code changes: exact trigonometric zeros at canonical axis angles are stabilized without modifying arbitrary tiny values; undefined tangent at odd quarter turns now yields `NaN` (displayed as an undefined real result); `atan2` follows the selected RAD/DEG mode; differentiation of `x^x` reports `ln(x) + 1` instead of `x/x`; the calculator appears first; the inline CSS and JavaScript are formatted into maintainable blocks while remaining a single offline HTML file.
+
+To reproduce: `node tests/unique-benchmarks.cjs` (nonzero exit code for failures) and `node tests/application-checks.cjs`. The resulting unique-question JSON lists every test ID, question, expected/actual values, skipped duplicates, and pass/fail status. No separate dependencies are needed for the Node checks. Browser checks were conducted locally with Chromium and Playwright, not against the public URL.
+
+## Earlier snapshot (before corrections)
+
 This report compares the supplied benchmark ZIP with the current repository source and exercises the calculator's offline, rule-based tutor. **It does not certify the deployed GitHub Pages app through live browser automation.**
 
 ## Results
@@ -31,12 +41,12 @@ The ordinary full-spectrum runner now skips its two duplicate expressions, so it
 
 The supplied archive's **`benchmark3.js`** and saved **`benchmark-20000-results.json`** were inspected. The saved report claimed 20,000/20,000, but that exact archived random run was **not reproduced**, because the script uses nondeterministic random inputs and depends on `mathjs`, which was not installed here. The 20,000/20,000 result above is from **a new fixed-seed run** with its own documented generator and reference math, not a claim that the archived random trial was rerun.
 
-## Independently reproduced failures
+## Historical failures (resolved in the current source)
 
 1. **`atan2(1,2)` in DEG mode:** The app gives approximately `0.463647609` radians; the expected degree result is approximately `26.565051177`. `Math.atan2` is passed through without converting the output into degrees.
 2. **`tan(270)` in DEG mode:** The app produces about `5.443746451065123e15` instead of rejecting or marking the mathematically undefined tangent. Floating-point proximity to an odd 90° angle should be treated cautiously.
 
-The app itself was **not patched** for these issues: keeping the regression failures visible avoids silently claiming a perfect score. After a fix, rerun the suite and update this record.
+These defects were documented in the earlier snapshot. **They are now fixed in the current `main` source** and covered by newly added unique regression questions. The older counts above are preserved for historical comparison rather than presented as current failures.
 
 ## What was actually compared
 
@@ -54,4 +64,4 @@ Numeric comparisons use a mixed absolute/relative tolerance, and the old fixed c
 
 ## Follow-up recommendations
 
-First fix and regression-test DEG-mode `atan2` and tangent singularities. Then run a real deployed-site browser matrix (Chrome, Firefox, Safari, mobile browsers) and test actual JSON export/import, browser storage persistence, and AI-agent UI navigation. Save both results and the exact deployed source revision so the site and repository can be compared byte for byte.
+DEG-mode `atan2` and tangent singularities are now corrected and regression-tested. Next, run a real deployed-site browser matrix (Chrome, Firefox, Safari, mobile browsers) and test actual JSON export/import, browser storage persistence, and AI-agent UI navigation. Save both results and the exact deployed source revision so the site and repository can be compared byte for byte.
