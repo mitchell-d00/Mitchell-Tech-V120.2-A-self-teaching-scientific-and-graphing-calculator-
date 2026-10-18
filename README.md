@@ -208,3 +208,10 @@ The app deliberately remains a **standalone HTML file**: all CSS and JavaScript 
 The built-in tutor is now **Mr. E**. He explains supported calculator functions, offers 20 math lessons (including calculator controls and Cartesian/polar/parametric graphing), guides practice with hints, gives sampled graph walkthroughs, and can explain a test record by ID after **Load benchmark JSON**. Example prompts: `teach fractions`, `what is atan2`, `explain graph x^2-4`, `practice powers`, and `explain test MT-000001` (after importing the test results JSON). See [MR-E.md](MR-E.md) for the supported curriculum, test import procedure, limits, and suggested questions. Mr. E is rule-based and completely offline, **not an embedded LLM**.
 
 Tutor update verification on 18 October 2026: **69/69 distinct Mr. E prompt checks**, **2,205/2,205 legacy math checks using the original non-deduplicated fixed-case harness**, **104/104 application checks**, and **29/29 local Chromium UI/tutor checks**. These are separate suites; they should not be summed into a new unique total. See [MR-E.md](MR-E.md).
+
+## Clear calculations and graphs
+
+- **Clear History** appears just above recent calculator results when history exists. It clears the stored calculation history, but **keeps** the last answer (`ans`), one-number memory (`mem`), saved notebooks, and graph expressions.
+- **Clear All Graphs** is beside **Add an expression** in the Expressions panel. It removes all plotted expression rules at once; saved notebooks, calculator history, memory, and the current graph view remain intact. The control disables itself when there are no graphs. You can add a new graph immediately.
+
+Both actions autosave the updated workspace in browser-local storage. They do **not** erase exported backups or separate saved notebook snapshots. Use `node tests/clear-controls.cjs` to rerun the selective-clear regression tests.
