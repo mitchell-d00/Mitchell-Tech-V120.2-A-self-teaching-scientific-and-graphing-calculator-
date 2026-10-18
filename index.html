@@ -326,6 +326,37 @@ p {
   max-height: 160px;
   overflow: auto;
 }
+.history-actions {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+.graph-actions {
+  flex-wrap: wrap;
+}
+.graph-actions .add {
+  flex: 1 1 170px;
+  width: auto;
+}
+.clear-action {
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.clear-action:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--muted);
+}
+.clear-action:disabled {
+  opacity: .5;
+  cursor: default;
+}
 .history button {
   display: block;
   text-align: left;
@@ -1257,8 +1288,8 @@ body {
 }
 </style></head><body>
 <header><div class="brand"><div class="mark">∿</div><div><b>Mitchell Tech <span style="font:11px system-ui;letter-spacing:0;color:var(--mint)">V120.2</span></b><small>Learn · Calculate · Explore</small></div></div><div class="actions"><span class="status">● Runs entirely on your device</span><button id="theme" title="Switch light / dark theme" aria-label="Switch theme">◐</button><button id="settings">Settings</button><button id="help">Guide</button><button id="notebooks">Notebooks</button><button id="save" class="primary">Save</button></div></header>
-<div class="wrap"><div class="layout"><aside class="left"><section class="panel calc"><div class="panelhead"><h2 id="calcTitle">Standard calculator</h2><button class="mode" id="angle">RAD</button></div><div class="pad"><div class="tabs" style="margin-bottom:8px" role="group" aria-label="Calculator mode"><button id="standardMode" class="active" aria-pressed="true">Standard</button><button id="scientificMode" aria-pressed="false">Scientific</button><button id="customMode" aria-pressed="false">My board</button></div><input class="calcinput" id="calc" placeholder="Try sqrt(144) + 2^3" aria-label="Calculation"><div class="calcresult" id="calcresult" aria-live="polite">0</div><div class="field"><label for="keyTarget">Keys enter into</label><select id="keyTarget"><option value="calc">Calculator</option></select></div><div class="keys" id="keys"></div><div id="functionBoard"><div class="boardlabel">FUNCTION KEYS</div><div class="functionkeys" id="functionKeys"></div></div><div class="boardlabel">SYMBOLS & GRAPH INPUT</div><div id="symbolKeys" class="functionkeys"></div><div class="field" style="margin:10px 0 0"><button class="tiny" id="memStore">MS</button><button class="tiny" id="memRecall">MR</button><button class="tiny" id="memClear">MC</button><span class="notes" id="memory">M = 0</span></div></div><div class="history" id="history"></div></section>
-<section class="panel functionpanel"><div class="panelhead"><h2>Expressions</h2><span class="tag">LIVE GRAPH</span></div><div class="expressions" id="expressions"></div><div class="pad" style="padding-top:0;padding-bottom:0"><button class="add" id="add">＋ Add an expression</button></div><div class="sliders"><div><div class="sliderline"><label for="sliderA">Parameter <b style="color:var(--mint)">a</b></label><input id="valA" type="number" min="-10" max="10" step=".1" aria-label="Parameter a value"></div><input id="sliderA" type="range" min="-10" max="10" step=".1" aria-label="Parameter a"></div><div><div class="sliderline"><label for="sliderB">Parameter <b style="color:var(--pink)">b</b></label><input id="valB" type="number" min="-10" max="10" step=".1" aria-label="Parameter b value"></div><input id="sliderB" type="range" min="-10" max="10" step=".1" aria-label="Parameter b"></div><div class="slidernote">Use a and b in any expression. Drag to explore.</div></div></section></aside>
+<div class="wrap"><div class="layout"><aside class="left"><section class="panel calc"><div class="panelhead"><h2 id="calcTitle">Standard calculator</h2><button class="mode" id="angle">RAD</button></div><div class="pad"><div class="tabs" style="margin-bottom:8px" role="group" aria-label="Calculator mode"><button id="standardMode" class="active" aria-pressed="true">Standard</button><button id="scientificMode" aria-pressed="false">Scientific</button><button id="customMode" aria-pressed="false">My board</button></div><input class="calcinput" id="calc" placeholder="Try sqrt(144) + 2^3" aria-label="Calculation"><div class="calcresult" id="calcresult" aria-live="polite">0</div><div class="field"><label for="keyTarget">Keys enter into</label><select id="keyTarget"><option value="calc">Calculator</option></select></div><div class="keys" id="keys"></div><div id="functionBoard"><div class="boardlabel">FUNCTION KEYS</div><div class="functionkeys" id="functionKeys"></div></div><div class="boardlabel">SYMBOLS & GRAPH INPUT</div><div id="symbolKeys" class="functionkeys"></div><div class="field" style="margin:10px 0 0"><button class="tiny" id="memStore">MS</button><button class="tiny" id="memRecall">MR</button><button class="tiny" id="memClear">MC</button><span class="notes" id="memory">M = 0</span></div></div><div class="history-actions hidden" id="historyActions"><span>Recent calculations</span><button type="button" class="tiny clear-action" id="clearHistory" aria-label="Clear calculation history">Clear History</button></div><div class="history" id="history"></div></section>
+<section class="panel functionpanel"><div class="panelhead"><h2>Expressions</h2><span class="tag">LIVE GRAPH</span></div><div class="expressions" id="expressions"></div><div class="pad graph-actions" style="padding-top:0;padding-bottom:0"><button class="add" id="add">＋ Add an expression</button><button type="button" class="tiny clear-action" id="clearGraphs" aria-label="Clear all graph expressions">Clear All Graphs</button></div><div class="sliders"><div><div class="sliderline"><label for="sliderA">Parameter <b style="color:var(--mint)">a</b></label><input id="valA" type="number" min="-10" max="10" step=".1" aria-label="Parameter a value"></div><input id="sliderA" type="range" min="-10" max="10" step=".1" aria-label="Parameter a"></div><div><div class="sliderline"><label for="sliderB">Parameter <b style="color:var(--pink)">b</b></label><input id="valB" type="number" min="-10" max="10" step=".1" aria-label="Parameter b value"></div><input id="sliderB" type="range" min="-10" max="10" step=".1" aria-label="Parameter b"></div><div class="slidernote">Use a and b in any expression. Drag to explore.</div></div></section></aside>
 <main class="main"><section class="panel graphpanel"><div class="graphbar"><div class="tabs"><button id="graphTab" class="active">Graph</button><button id="tableTab">Table</button><button id="examples">Explore</button></div><button id="graphKeyToggle" aria-expanded="false">Graph keys</button><button id="fullscreen" title="Expand graph viewer">Expand</button><button id="trace" class="toggle" title="Trace first visible curve">Trace</button><button id="derivative" title="Overlay numerical derivatives of Cartesian curves">f′</button><button id="zoomIn" aria-label="Zoom in">＋</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="fit" title="Fit visible Cartesian curves vertically">Fit y</button><button id="square" title="Use equal scale on both axes">1:1</button><button id="home">Reset view</button><button id="png" title="Download graph as PNG">↗ PNG</button></div><div id="graphKeyDrawer" class="graphkeydrawer hidden"><div class="field"><label for="graphKeyExpr">Edit</label><select id="graphKeyExpr"></select><label for="graphFunction">Function</label><select id="graphFunction"></select><button id="insertGraphFunction">Insert</button></div><div id="graphTouchKeys" class="graphtouchkeys"></div></div><div id="graphview" class="graphwrap"><canvas id="graph" tabindex="0" aria-label="Interactive function graph. Drag to pan, scroll or pinch to zoom."></canvas><div class="graphlabel">YOUR IDEAS, IN COORDINATES</div><div class="graphhint">Drag to pan · Scroll / pinch to zoom</div><div class="coord" id="coords">x 0.000 · y 0.000</div></div><div id="tableview" class="tablewrap hidden"><table><thead id="tablehead"></thead><tbody id="tablebody"></tbody></table></div><div class="graphcaption" id="graphCaption">Horizontal axis: input x · Vertical axis: output y · Select a graph expression to use the on-screen keys.</div><div class="graphbottom"><div class="viewinputs"><label>x <input id="xmin" type="number" step="any" aria-label="X minimum"></label><span>to</span><input id="xmax" type="number" step="any" aria-label="X maximum"><label>y <input id="ymin" type="number" step="any" aria-label="Y minimum"></label><span>to</span><input id="ymax" type="number" step="any" aria-label="Y maximum"><button id="applyView" class="tiny">Apply</button></div><span id="angleNote">Radians · real-valued functions</span></div></section>
 <div class="under"><section class="panel"><div class="panelhead"><h2>Inspect the mathematics</h2><span class="tag">NUMERICAL LAB</span></div><div class="pad"><div class="field"><label for="analysisFn">Function</label><select id="analysisFn"></select></div><div class="field"><label for="operation">Find</label><select id="operation"><option value="value">Value & slope at x</option><option value="roots">Roots in an interval</option><option value="integral">Definite integral</option><option value="extrema">Stationary points</option><option value="intersection">Intersections with next curve</option></select></div><div class="field"><label for="bound1" id="boundLabel">x / from</label><input id="bound1" value="0" type="number" step="any"><label for="bound2">to</label><input id="bound2" value="6.28318530718" type="number" step="any"></div><button id="analyze" class="full primary">Analyze function</button><div class="resultbox" id="analysisResult" aria-live="polite">Choose a function and follow the numbers. Results here are numerical approximations.</div></div></section>
 <section class="panel tutor"><div class="panelhead"><h2>Mr. E · Math coach</h2><span class="tag">OFFLINE · RULE BASED</span></div><div class="pad"><p>Ask Mr. E to teach concepts, explain math and graphs, check practice answers, or walk through a benchmark test. Offline and rule-based.</p><div class="chips"><button data-prompt="explain (2+3)^2">Explain a calculation</button><button data-prompt="solve x^2-5*x+6=0">Solve an equation</button><button data-prompt="differentiate sin(x)*x^2">Find a derivative</button><button data-prompt="teach graphing">Learn graphing</button><button data-prompt="what is atan2">Explore a function</button><button data-prompt="practice fractions">Practice with Mr. E</button></div><textarea id="prompt" placeholder="Ask Mr. E: teach trigonometry, explain graph x^2-4, or explain test sin(pi)" aria-label="Ask Mr. E, offline math coach"></textarea><button id="ask" class="full" style="margin-top:7px">Ask Mr. E ↗</button><div class="field"><button id="mreLoad" class="tiny" type="button">Load benchmark JSON</button><span class="localnote" id="mreImportStatus">Optional: load a test report to explain questions by their MT- ID.</span><input id="mreImport" type="file" accept=".json,application/json" class="hidden" aria-label="Import benchmark test results"></div><div id="tutorResult" class="resultbox" aria-live="polite">I’m Mr. E. Try “teach fractions”, “what is tan”, “explain graph x^2-4”, “practice powers”, or “explain test sin(pi)”.</div></div></section></div></main></div>
@@ -1532,7 +1563,7 @@ catch (err) {
 } }); $$('.exprsub span').forEach((el, i) => { el.textContent = compiled[i].error || ({ cart: 'y = f(x)', polar: 'r = f(t)', param: 'x(t); y(t)' }[compiled[i].type]); el.className = compiled[i].error ? 'error' : ''; }); updateSelect(); updateKeyTargets(); shading = null; markers = []; draw(); if (!$('#tableview').classList.contains('hidden'))
     renderTable(); persist(); }
 function renderExpressions() { const active = $('#analysisFn').value; $('#expressions').innerHTML = state.expressions.map((e, i) => `<div class="expr"><div class="exprtop"><button class="dot" style="background:${e.on ? colorAt(i) : 'var(--line)'}" data-visible="${i}" aria-label="${e.on ? 'Hide' : 'Show'} expression ${i + 1}"></button><input type="text" value="${esc(e.text)}" data-expr="${i}" aria-label="Expression ${i + 1}" spellcheck="false"><button class="tiny" data-remove="${i}" aria-label="Remove expression ${i + 1}">×</button></div><div class="exprsub"><select data-type="${i}" aria-label="Expression ${i + 1} graph type"><option value="cart" ${e.type === 'cart' ? 'selected' : ''}>Cartesian</option><option value="polar" ${e.type === 'polar' ? 'selected' : ''}>Polar</option><option value="param" ${e.type === 'param' ? 'selected' : ''}>Parametric</option></select><span></span></div></div>`).join(''); compile(); if ([...$('#analysisFn').options].some(o => o.value === active))
-    $('#analysisFn').value = active; updateKeyTargets(); }
+    $('#analysisFn').value = active; updateKeyTargets(); $('#clearGraphs').disabled = state.expressions.length === 0; }
 $('#expressions').addEventListener('input', e => { if (e.target.dataset.expr !== undefined) {
     state.expressions[+e.target.dataset.expr].text = e.target.value;
     compile();
@@ -1549,6 +1580,13 @@ $('#expressions').addEventListener('click', e => { if (e.target.dataset.visible 
     state.expressions.splice(+e.target.dataset.remove, 1);
     renderExpressions();
 } });
+$('#clearGraphs').onclick = () => {
+    if (!state.expressions.length) return;
+    state.expressions = [];
+    $('#analysisResult').textContent = 'Add a graph expression to analyze a function.';
+    renderExpressions();
+    toast('All graph expressions cleared. Saved notebooks are unchanged.');
+};
 $('#add').onclick = () => { if (state.expressions.length >= 12)
     return toast('Up to 12 expressions per workspace.'); state.expressions.push({ text: '', type: 'cart', on: true }); renderExpressions(); $$('[data-expr]').at(-1).focus(); };
 for (const [key, suffix] of [['a', 'A'], ['b', 'B']])
@@ -1980,7 +2018,17 @@ $('#keys').onclick = e => { if (e.target.dataset.key)
     insertMathKey(e.target.dataset.key); };
 $('#calc').onkeydown = e => { if (e.key === 'Enter')
     calcRun(); };
-function renderHistory() { $('#history').innerHTML = state.history.slice(0, 8).map((h, i) => '<button data-history="' + i + '">' + esc(h.expr) + ' = ' + fmt(h.value) + '</button>').join(''); }
+function renderHistory() {
+    $('#history').innerHTML = state.history.slice(0, 8).map((h, i) => '<button data-history="' + i + '">' + esc(h.expr) + ' = ' + fmt(h.value) + '</button>').join('');
+    $('#historyActions').classList.toggle('hidden', state.history.length === 0);
+}
+$('#clearHistory').onclick = () => {
+    if (!state.history.length) return;
+    state.history = [];
+    renderHistory();
+    persist();
+    toast('Calculation history cleared. Last answer and memory are unchanged.');
+};
 $('#history').onclick = e => { if (e.target.dataset.history !== undefined) {
     $('#calc').value = state.history[+e.target.dataset.history].expr;
     $('#calc').focus();
