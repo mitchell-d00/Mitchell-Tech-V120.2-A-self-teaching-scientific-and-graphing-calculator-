@@ -69,6 +69,6 @@ DEG-mode `atan2` and tangent singularities are now corrected and regression-test
 
 ## Mr. E tutor-specific tests — 18 October 2026
 
-**69 / 69 distinct tutoring prompts passed** in `tests/mr-e-checks.cjs`, covering every supported function reference, all 20 built-in topics, practice, graph explanations, distinct imported report entries, and import validation. The updated app also passed **2,205 / 2,205 fixed mathematical cases**, **104 / 104 application checks**, and **29 / 29 local Chromium behavior checks**. This is a separate tutor-update run; the earlier 22,242/22,242 extended benchmark result was **not rerun in full** for this change. See [MR-E.md](MR-E.md).
+**69 / 69 distinct tutoring prompts passed** in `tests/mr-e-checks.cjs`, covering every supported function reference, all 20 built-in topics, practice, graph explanations, distinct imported report entries, and import validation. The updated app also passed **2,205 / 2,205 cases in the original, non-deduplicated fixed-case harness**, **104 / 104 application checks**, and **29 / 29 local Chromium behavior checks**. This is a separate tutor-update run; the earlier 22,242/22,242 extended benchmark result was **not rerun in full** for this change. See [MR-E.md](MR-E.md).
 
 Test explanations are derived from the imported `name`, `category`, `actual`, `expected`, and `pass` fields plus supported local math rules. Loading a record does **not** independently validate that record's original outcome. Unsupported expressions receive a limitation message rather than invented mathematical proof.
