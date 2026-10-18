@@ -56,7 +56,7 @@ node tests/unique-benchmarks.cjs
 
 The new `mr-e-checks.cjs` verifies coverage of all supported function references, all 20 teaching topics, distinct graph and math explanations, a practice session, and validation of imported benchmark records.
 
-**18 October 2026 local verification:** 69 / 69 *unique Mr. E prompt tests*, 2,205 / 2,205 existing mathematical checks, 104 / 104 application checks, and 29 / 29 Chromium tutor/UI checks passed. Chromium tested locally injected HTML, **not the published GitHub Pages deployment**. The earlier 22,242 unique benchmark outcome remains a previously published result, not a claim that the complete extended suite was rerun for this tutor update.
+**18 October 2026 local verification:** 69 / 69 *unique Mr. E prompt tests*, 2,205 / 2,205 checks using the original fixed-case legacy harness (before repository deduplication), 104 / 104 application checks, and 29 / 29 Chromium tutor/UI checks passed. Chromium tested locally injected HTML, **not the published GitHub Pages deployment**. The earlier 22,242 unique benchmark outcome remains a previously published result, not a claim that the complete extended suite was rerun for this tutor update.
 
 ## Limitations worth knowing
 
