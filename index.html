@@ -2753,4 +2753,205 @@ window.addEventListener('resize', draw);
 if (typeof ResizeObserver !== 'undefined')
     new ResizeObserver(() => draw()).observe($('#graphview'));
 refresh();
+// Public, synchronous, browser-local JavaScript API for agents and other scripts.
+// No network endpoint, API key, eval(), or external dependencies are involved.
+// Scripts in this page's JavaScript context can call window.MitchellTech directly.
+function mtResponse(work) {
+    try { return { ok: true, ...work() }; }
+    catch (error) { return { ok: false, error: error instanceof Error ? error.message : String(error) }; }
+}
+function mtExpression(text) {
+    if (typeof text !== 'string' || !text.trim() || text.length > 1000)
+        throw Error('Provide a nonempty mathematical expression up to 1,000 characters.');
+    return text;
+}
+function mtMode(mode) {
+    if (mode !== 'rad' && mode !== 'deg') throw Error('Angle must be "rad" or "deg".');
+    return mode;
+}
+function mtGraphType(type) {
+    if (!['cart', 'polar', 'param'].includes(type))
+        throw Error('Graph type must be cart, polar or param.');
+    return type;
+}
+function mtGraphInput(text, type) {
+    mtExpression(text);
+    mtGraphType(type);
+    if (type === 'param') {
+        const parts = text.split(';');
+        if (parts.length !== 2) throw Error('Parametric graphs need x(t); y(t).');
+        parts.forEach(part => parse(part));
+    } else {
+        parse(text.replace(/^\s*(?:y|r)\s*=/i, ''));
+    }
+    return text;
+}
+function mtIndex(i) {
+    if (!Number.isInteger(i) || i < 0 || i >= state.expressions.length)
+        throw Error('Graph index is outside the current list. Indices start at 0.');
+    return i;
+}
+function mtVariables(overrides) {
+    const values = vars();
+    if (overrides === undefined) return values;
+    if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides))
+        throw Error('variables must be an object with numeric x, t, a, b, ans or mem.');
+    for (const [key, value] of Object.entries(overrides)) {
+        if (!['x', 't', 'a', 'b', 'ans', 'mem'].includes(key) || !Number.isFinite(value))
+            throw Error('Unsupported or nonfinite variable: ' + key);
+        values[key] = value;
+    }
+    return values;
+}
+function mtFinite(value) {
+    if (!Number.isFinite(value)) throw Error('Undefined in the real-number domain, or overflow.');
+    return value;
+}
+const MitchellTech = Object.freeze({
+    version: '1.0.0',
+    capabilities: Object.freeze(['calculate', 'askMrE', 'addGraph', 'updateGraph', 'removeGraph',
+        'listGraphs', 'sampleGraph', 'clearGraphs', 'getHistory', 'clearHistory',
+        'getState', 'setAngle', 'functions', 'differentiate', 'integrate', 'findRoots']),
+    functions() { return [...FUNCS, 'percent'].sort(); },
+    getState() { return {
+        angle: state.angle, ans: state.ans, mem: state.mem, a: state.a, b: state.b,
+        view: { ...state.view }, historyCount: state.history.length,
+        graphs: state.expressions.map((entry, index) => ({ index, ...entry }))
+    }; },
+    getHistory() { return structuredClone(state.history); },
+    calculate(expression, options = {}) {
+        return mtResponse(() => {
+            mtExpression(expression);
+            if (!options || typeof options !== 'object' || Array.isArray(options)) throw Error('Options must be an object.');
+            if (options.record === true) {
+                if (options.angle !== undefined || options.variables !== undefined)
+                    throw Error('Recorded calculations use the current angle and workspace variables.');
+                const previous = state.history[0];
+                $('#calc').value = expression;
+                calcRun();
+                if (state.history[0] === previous) throw Error($('#calcresult').textContent || 'Calculation failed.');
+                return { expression, value: state.ans, formatted: fmt(state.ans), angle: state.angle, recorded: true };
+            }
+            const requested = options.angle === undefined ? angle : mtMode(options.angle);
+            const variables = mtVariables(options.variables);
+            const before = angle;
+            let value;
+            try { angle = requested; value = mtFinite(evaluate(parse(expression), variables)); }
+            finally { angle = before; }
+            return { expression, value, formatted: fmt(value), angle: requested, recorded: false };
+        });
+    },
+    askMrE(question) {
+        return mtResponse(() => {
+            if (typeof question !== 'string' || question.length > 1000)
+                throw Error('Give Mr. E a question under 1,000 characters.');
+            return { question, answer: tutor(question) };
+        });
+    },
+    listGraphs() { return state.expressions.map((entry, index) => ({ index, ...entry })); },
+    addGraph(expression, options = {}) {
+        return mtResponse(() => {
+            if (!options || typeof options !== 'object' || Array.isArray(options)) throw Error('Options must be an object.');
+            const type = mtGraphType(options.type === undefined ? 'cart' : options.type);
+            mtGraphInput(expression, type);
+            if (state.expressions.length >= 12) throw Error('A workspace supports up to 12 graphs.');
+            const entry = { text: expression, type, on: options.on !== false };
+            state.expressions.push(entry);
+            renderExpressions(); // Compiles, redraws and autosaves the graph.
+            return { index: state.expressions.length - 1, graph: { ...entry } };
+        });
+    },
+    updateGraph(index, expression, options = {}) {
+        return mtResponse(() => {
+            mtIndex(index);
+            if (!options || typeof options !== 'object' || Array.isArray(options)) throw Error('Options must be an object.');
+            const prior = state.expressions[index];
+            const type = mtGraphType(options.type === undefined ? prior.type : options.type);
+            mtGraphInput(expression, type);
+            const entry = { text: expression, type, on: options.on === undefined ? prior.on : options.on !== false };
+            state.expressions[index] = entry;
+            renderExpressions();
+            return { index, graph: { ...entry } };
+        });
+    },
+    removeGraph(index) {
+        return mtResponse(() => {
+            mtIndex(index);
+            const [removed] = state.expressions.splice(index, 1);
+            renderExpressions();
+            return { removed: { ...removed }, remaining: state.expressions.length };
+        });
+    },
+    sampleGraph(index, input) {
+        return mtResponse(() => {
+            mtIndex(index);
+            if (!Number.isFinite(input)) throw Error('Graph input must be finite.');
+            const graph = compiled[index];
+            if (!graph || graph.error) throw Error(graph?.error || 'Graph is not compiled.');
+            const values = vars(input);
+            if (graph.type === 'cart') return { index, type: 'cart', x: input, y: mtFinite(evaluate(graph.ast, values)) };
+            const theta = angle === 'deg' ? input * Math.PI / 180 : input;
+            if (graph.type === 'polar') {
+                const r = mtFinite(evaluate(graph.ast, values));
+                return { index, type: 'polar', t: input, r, x: r * Math.cos(theta), y: r * Math.sin(theta) };
+            }
+            return { index, type: 'param', t: input,
+                x: mtFinite(evaluate(graph.ast, values)), y: mtFinite(evaluate(graph.second, values)) };
+        });
+    },
+    clearGraphs() {
+        return mtResponse(() => {
+            const removed = state.expressions.length;
+            $('#clearGraphs').click();
+            return { removed, remaining: state.expressions.length };
+        });
+    },
+    clearHistory() {
+        return mtResponse(() => {
+            const removed = state.history.length;
+            $('#clearHistory').click();
+            return { removed, remaining: state.history.length };
+        });
+    },
+    setAngle(mode) {
+        return mtResponse(() => {
+            mtMode(mode);
+            state.angle = angle = mode;
+            refreshAngle();
+            shading = null; markers = [];
+            draw();
+            if (!$('#tableview').classList.contains('hidden')) renderTable();
+            persist();
+            return { angle: state.angle };
+        });
+    },
+    differentiate(expression) {
+        return mtResponse(() => {
+            mtExpression(expression);
+            const steps = [];
+            const derivative = simplify(deriv(parse(expression), steps));
+            return { expression, derivative: show(derivative), steps: [...steps] };
+        });
+    },
+    integrate(expression, from, to) {
+        return mtResponse(() => {
+            mtExpression(expression);
+            if (!Number.isFinite(from) || !Number.isFinite(to)) throw Error('Integration bounds must be finite.');
+            const ast = parse(expression);
+            const result = integral(x => evaluate(ast, { ...vars(x), x }), from, to);
+            return { expression, from, to, value: mtFinite(result.value), method: 'numerical Simpson rule', panels: result.n };
+        });
+    },
+    findRoots(expression, from, to) {
+        return mtResponse(() => {
+            mtExpression(expression);
+            if (!Number.isFinite(from) || !Number.isFinite(to) || from >= to)
+                throw Error('Provide increasing, finite search bounds.');
+            const ast = parse(expression);
+            const points = roots(x => evaluate(ast, vars(x)), from, to);
+            return { expression, from, to, roots: [...points], method: 'numerical search; not a completeness proof' };
+        });
+    }
+});
+Object.defineProperty(window, 'MitchellTech', { value: MitchellTech, writable: false, configurable: true });
 </script></body></html>
