@@ -1,0 +1,56 @@
+# Developing Mitchell Tech V120.2
+
+## Core constraint: it stays a single HTML file
+
+Open `index.html` in a browser. This is the complete application: no bundler, Node runtime, cloud account, API key, external framework, or hosted dependencies are required to use it. Node.js is only used for optional development tests. Both the `<style>` and `<script>` blocks are formatted for human review instead of being compressed into thousand-character lines.
+
+## Navigating the source
+
+| Area | Find these symbols / selectors in `index.html` | Responsibility |
+| --- | --- | --- |
+| Layout and responsive styles | `.layout`, `.calc`, `.functionpanel`, `@media` | Calculator-first desktop/mobile layouts; accessible controls |
+| Expression parser | `FUNCS`, `parse`, `evaluate`, `callFn` | Safe grammar and numeric evaluation; no `eval` |
+| Numeric output | `fmt`, `TRIG_AXIS_EPS`, `callFn` | Rounded display and domain-sensitive trig behavior |
+| Symbolic math | `simplify`, `deriv`, `show` | Rule-based derivative steps, e.g. `x^x` |
+| Graphs and analysis | `compile`, `draw`, `roots`, `integral` | Deterministic canvas rendering and numerical methods |
+| Calculator controls | `renderKeys`, `calcRun`, `refreshAngle` | On-screen input, history and RAD/DEG |
+| Offline tutor | `tutor`, `recallPages` | Explicit rules and local recall; no embedded LLM |
+| Storage and portability | `localStorage`, `persist`, `importFile`, `exportWorkspace` | Browser-local state plus transfer through saved JSON |
+
+The calculator panel intentionally comes first in the DOM and responsive layout; educational panels follow it. Keep that order when modifying the interface.
+
+## Numerical correctness policy
+
+- Angle mode applies to sine, cosine, tangent, inverse trig, **and `atan2`**.
+- At values *extremely close to exact multiples of 90 degrees (or π/2 radians)*, trig rounding artifacts are normalized only inside trigonometric functions. Do not use a global `Math.abs(x)<1e-12?0:x` display rule; it would hide legitimate small values.
+- Tangent is undefined at odd multiples of 90 degrees. The evaluator uses `NaN` for those near-axis singularities; the UI reports undefined rather than a misleading large finite answer.
+- The `TRIG_AXIS_EPS` threshold is measured in radians; beware of very large arguments where floating-point input precision already limits reliable range reduction.
+- Derivative `x^x` may be simplified to `x^x * (ln(x) + 1)` only in the real domain `x>0`. Keep derivative rules domain-conscious rather than simplifying arbitrary rational factors with an unknown zero denominator.
+- Distinguish display precision, approximate numeric accuracy, and symbolic correctness. The engine uses ordinary JavaScript floating-point numbers, **not arbitrary precision arithmetic**.
+
+## Reproducible checks
+
+From the repository root, with Node.js 22 or another recent supported Node.js release:
+
+```sh
+node tests/full-spectrum.cjs
+node tests/application-checks.cjs
+node tests/unique-benchmarks.cjs
+```
+
+`tests/unique-benchmarks.cjs` is the recommended regression gate. It builds 20,000 deterministic generated expressions plus the fixed corpus, distinct tutor requests, angle-mode cases and 16 targeted regressions. Questions are normalized and deduplicated globally; each kept question has a stable `MT-` ID. Output goes to `tests/unique-benchmarks-results.json` with exact inputs, expected/actual values, failures, and duplicate skips. The process exits unsuccessfully when tests fail. The 18 October 2026 corrected source scored **22,242 / 22,242** with two repeated raw expressions skipped.
+
+The engine/application script passed **104 / 104**. Additional browser behavior was checked in Chromium at 390px and 1366px (**22 / 22**), but that browser check used locally injected HTML, *not the deployed web origin*. A proper release should also test persistence after a real reload, backup import/export roundtrips, browser permissions, mobile Safari and Firefox, and hosted GitHub Pages parity.
+
+## Suggested edit-and-release loop
+
+1. Edit the one-file app and preserve the self-contained `index.html` format.
+2. Add **a new, distinct math input or tutor question** for every behavior change; do not count an identical question twice. For mode-dependent tests, include RAD or DEG in its identity.
+3. Run all three Node commands, and inspect the unique runner's JSON plus exit code.
+4. Smoke-test the rendered page in browser widths around 390px and 1366px; verify actual text in the result box, not just toleranced floats.
+5. Verify localStorage behavior on the hosted origin and JSON portability on actual devices before describing those workflows as independently tested.
+6. Update `BENCHMARKS.md` with the tested revision, actual counts, and any known failures. Only then release to `main`.
+
+## Scope and honesty
+
+This is a local-first scientific calculator and rules-based math tutor. An external AI can drive it through browser automation, but the page does not itself contain an LLM. Local browser state belongs to that browser and origin; moving devices requires a transferred backup, not merely a URL. Keeping this distinction in public documentation makes both the software and its benchmark numbers reproducible.
