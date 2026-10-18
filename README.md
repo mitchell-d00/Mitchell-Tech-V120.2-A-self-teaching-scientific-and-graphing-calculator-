@@ -184,7 +184,7 @@ See `TESTING.md` for the live-browser findings, corrected defects and verificati
 
 ## Files
 
-- `index.html` — the complete calculator, graph viewer, teacher and local ledger
+- `index.html` — the complete calculator, graph viewer, teacher and local ledger (CSS and JavaScript formatted for editing)
 - `README.md` — setup, usage and project reference
 - `logo.svg` — project logo
 - `LICENSE` — MIT license, matching the reference project's attribution
@@ -197,4 +197,8 @@ MIT. See `LICENSE`.
 
 ## Reproducible benchmarks
 
-For the latest **globally deduplicated** mathematical and offline-tutor drills, see [BENCHMARKS.md](BENCHMARKS.md). The extended Node.js runner is `node tests/unique-benchmarks.cjs`; it writes one result per distinct question to `tests/unique-benchmarks-results.json` and uses a fixed random seed. On 18 October 2026, **22,224 / 22,226** unique questions passed; two degree-mode edge cases remain documented failures. The calculator itself does not need Node.js to run.
+For the latest **globally deduplicated** mathematical and offline-tutor drills, see [BENCHMARKS.md](BENCHMARKS.md). The extended Node.js runner is `node tests/unique-benchmarks.cjs`; it writes one result per distinct question to `tests/unique-benchmarks-results.json` and uses a fixed random seed. Following the 18 October 2026 corrections, **22,242 / 22,242** unique questions pass, with two repeated raw expressions skipped by the deduplication gate. The earlier 22,224 / 22,226 result is retained in the historical benchmark report. The calculator itself does not need Node.js to run.
+
+## Development and source structure
+
+The app deliberately remains a **standalone HTML file**: all CSS and JavaScript are inline so downloads work without a build step or dependencies. The former multi-thousand-character style and script lines have been formatted for review, and the calculator now appears before educational panels on desktop and mobile. See [DEVELOPING.md](DEVELOPING.md) for source navigation, build-free testing, state/persistence boundaries, and reproducible verification.
