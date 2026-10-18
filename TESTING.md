@@ -1,5 +1,17 @@
 # Smoke test and mathematical regression report
 
+## Current source regression status — 18 October 2026, after fixes
+
+- **22,242 / 22,242** globally unique math, precision, and tutor questions pass in `tests/unique-benchmarks.cjs`. Two repeated raw expressions are skipped, with each executed question assigned its own stable ID in the results JSON.
+- **104 / 104** bundled engine/application checks pass.
+- **22 / 22** Chromium layout and behavior checks pass at 390px and 1366px, including a visible calculator above the fold, trig zero display, undefined tangent, memory-store handling, tutor output, no horizontal overflow, and zero uncaught JavaScript page errors. The browser harness injected the current HTML into Chromium: it did **not** reverify real-origin storage across reloads or the deployed GitHub Pages app.
+- **Resolved:** DEG-mode `atan2` now reports degrees; undefined tangent at odd 90-degree intervals no longer displays giant finite numbers; sine/cosine at canonical axes displays zero without blanket suppression of genuinely small results; the `x^x` derivative display simplifies `x/x` to 1.
+- Both inline CSS and JavaScript were reformatted into readable source, with the one-file offline model preserved.
+
+Reproduce the core checks with `node tests/unique-benchmarks.cjs` and `node tests/application-checks.cjs`. See [BENCHMARKS.md](BENCHMARKS.md) for the fresh test scope and earlier failures. **All other numeric scores lower in this file are retained as dated historical snapshots**.
+
+## Earlier test history
+
 Test date: October 18, 2026.
 
 ## Scope and results
