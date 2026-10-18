@@ -11,7 +11,7 @@ const asked=new Set(),skippedQuestions=[];let repeatsSkipped=0;function record(c
 for(const c of cases){try{const actual=run('fmt(evaluate(parse('+JSON.stringify(c.expr)+'),vars()))');const expected=Number(c.expected.toPrecision(10));const tol=Math.max(Math.abs(expected)*1e-9,1e-300);record(c.category,c.expr,Number.isFinite(+actual)&&Math.abs(+actual-expected)<=tol,actual,expected)}catch(e){record(c.category,c.expr,false,e.message,c.expected)}}
 for(const expr of ['1/0','0/0','sqrt(-1)','ln(0)','ln(-1)','log(-3)','asin(2)','acos(-2)','(-2)!','171!','exp(1000)']){let rejected=false,out;try{out=run('evaluate(parse('+JSON.stringify(expr)+'),vars())');rejected=!Number.isFinite(out)}catch(e){rejected=true;out=e.message}record('Domain handling',expr,rejected,String(out),'throw or nonfinite value (calculator must reject)')}
 for(const expr of ['alert(1)','constructor','2**3','2+','sqrt()','min(3)','pow(2)','sin(1,2)','(2+3','2+3)','x=3','[1,2]']){let rejected=false;try{run('parse('+JSON.stringify(expr)+')')}catch{rejected=true}record('Invalid expressions',expr,rejected,rejected?'rejected':'accepted','rejected')}
-run("angle='deg'");for(const [expr,exp]of [['sin(30)',.5],['cos(60)',.5],['tan(45)',1],['asin(.5)',30],['acos(.5)',60],['atan(1)',45],['atan2(1,0)',Math.PI/2]]){const n=run('evaluate(parse('+JSON.stringify(expr)+'),vars())');record('Angle modes','DEG: '+expr,Math.abs(n-exp)<1e-10,n,exp)}run("angle='rad'");
+run("angle='deg'");for(const [expr,exp]of [['sin(30)',.5],['cos(60)',.5],['tan(45)',1],['asin(.5)',30],['acos(.5)',60],['atan(1)',45],['atan2(1,0)',90]]){const n=run('evaluate(parse('+JSON.stringify(expr)+'),vars())');record('Angle modes','DEG: '+expr,Math.abs(n-exp)<1e-10,n,exp)}run("angle='rad'");
 for(const [expr,exp]of [['2*x',6],['x^2',9],['sin(x)',Math.sin(3)],['a*x+b',8]]){const n=run('evaluate(parse('+JSON.stringify(expr)+'),{x:3,a:2,b:2})');record('Function substitution',expr,Math.abs(n-exp)<1e-10,n,exp)}
 for(const [q,need]of [['solve 2*x+4=0','x = -2'],['solve x^2-5*x+6=0','x₁ = 3'],['solve x^2+1=0','No real roots'],['solve x=x','Every real x'],['solve 0*x=1','No solution'],['solve 0.000000000000001*x=1','x = 1e+15']]){const out=run('tutor('+JSON.stringify(q)+')');record('Equation tutor',q,q==='solve 0.000000000000001*x=1'?Number(out.match(/x = ([^\n]+)/)?.[1])===1e15:out.includes(need),out,q==='solve 0.000000000000001*x=1'?'x numerically equals 1000000000000000':need)}
 for(const [expr,lo,hi,expected]of [['x^2-4',-3,3,[-2,2]],['(x-1.12345)^2',-3,3,[1.12345]],['x^2+0.00000001',-1,1,[]],['1/x',-1,1,[]],['sin(x)',-4,4,[-Math.PI,0,Math.PI]]]){const rs=run('roots(x=>safeEval(parse('+JSON.stringify(expr)+'),x),'+lo+','+hi+')');const okay=rs.length===expected.length&&rs.every((x,i)=>Math.abs(x-expected[i])<1e-5);record('Numerical roots','roots '+expr+' in ['+lo+','+hi+']',okay,Array.from(rs),expected)}
@@ -76,6 +76,29 @@ for(const [expression,expected,note] of [
  catch(e){record('Degree-mode edge cases',expression,Number.isNaN(expected),e.message,note)}
 }
 run("angle='rad'");
+
+// Distinct regression questions for corrected trigonometry and tutoring.
+for(const [mode,expr,expected] of [
+ ['deg','sin(180)',0],['deg','cos(90)',0],['deg','sin(360)',0],
+ ['deg','tan(180)',0],['deg','cos(270)',0],['deg','tan(90)',NaN],
+ ['deg','atan2(-1,-1)',-135],['deg','atan2(0,-1)',180],
+ ['deg','tan(90.000000001)',Infinity],
+ ['rad','sin(pi)',0],['rad','cos(pi/2)',0],['rad','tan(pi)',0],
+ ['rad','tan(pi/2)',NaN],['rad','sin(1e-9)',Math.sin(1e-9)],
+ ['rad','1e-14',1e-14]
+]){
+ run('angle='+JSON.stringify(mode));
+ const value=run('evaluate(parse('+JSON.stringify(expr)+'),vars())');
+ const pass=Number.isNaN(expected)?Number.isNaN(value):expected===Infinity?
+   Number.isFinite(value)&&Math.abs(value)>1e8:
+   expected===0?Object.is(value,0):Math.abs(value-expected)<1e-12;
+ record('Unique trig and precision regressions',mode.toUpperCase()+' '+expr,pass,value,expected===Infinity?'large but finite':expected);
+}
+run("angle='rad'");
+const explainedPower=run("tutor('differentiate x^x')");
+record('Unique symbolic clarity regression','differentiate x^x — simplified output',
+ explainedPower.includes('ln(x) + 1')&&!explainedPower.includes('x / x'),
+ explainedPower,'(x ^ x) * (ln(x) + 1)');
 
 const groups={};for(const r of results){groups[r.category]??={passed:0,failed:0};groups[r.category][r.pass?'passed':'failed']++}
 const summary={unique_questions:asked.size,duplicate_questions_skipped:repeatsSkipped,skipped_questions:skippedQuestions,tests:results.length,passed:results.filter(r=>r.pass).length,failed:results.filter(r=>!r.pass).length,categories:groups,failures:results.filter(r=>!r.pass)};fs.writeFileSync(require('path').join(__dirname,'unique-benchmarks-results.json'),JSON.stringify({summary,results},null,2));console.log(JSON.stringify(summary,null,2));
