@@ -175,9 +175,12 @@ Plots and derivatives use sampling. Root searches can miss closely spaced or
 irregular solutions. Integrals use a fixed Simpson rule and can miss
 singularities. Numerical output is approximate; the graph plots real values.
 
-The implementation passed 101 engine and application logic checks, including
-simulated session reopening and JSON restoration. Visual browser testing was
-not available in the build environment.
+The implementation passed 2,205 mathematical drills plus 104 engine/application checks, including
+simulated session reopening and JSON restoration. The original published build was also smoke-tested in desktop Chrome. The patched build has not been deployed by this test run. See `TESTING.md` for findings, coverage and limits.
+
+## Test and patch report
+
+See `TESTING.md` for the live-browser findings, corrected defects and verification limits. Optional repeatable Node.js drills are in `tests/`. These files are not required to run the calculator.
 
 ## Files
 
