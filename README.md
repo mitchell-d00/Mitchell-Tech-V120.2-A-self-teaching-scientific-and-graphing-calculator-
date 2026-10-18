@@ -202,3 +202,9 @@ For the latest **globally deduplicated** mathematical and offline-tutor drills, 
 ## Development and source structure
 
 The app deliberately remains a **standalone HTML file**: all CSS and JavaScript are inline so downloads work without a build step or dependencies. The former multi-thousand-character style and script lines have been formatted for review, and the calculator now appears before educational panels on desktop and mobile. See [DEVELOPING.md](DEVELOPING.md) for source navigation, build-free testing, state/persistence boundaries, and reproducible verification.
+
+## Mr. E — expanded offline math coach
+
+The built-in tutor is now **Mr. E**. He explains supported calculator functions, offers 20 math lessons (including calculator controls and Cartesian/polar/parametric graphing), guides practice with hints, gives sampled graph walkthroughs, and can explain a test record by ID after **Load benchmark JSON**. Example prompts: `teach fractions`, `what is atan2`, `explain graph x^2-4`, `practice powers`, and `explain test MT-000001` (after importing the test results JSON). See [MR-E.md](MR-E.md) for the supported curriculum, test import procedure, limits, and suggested questions. Mr. E is rule-based and completely offline, **not an embedded LLM**.
+
+Tutor update verification on 18 October 2026: **69/69 distinct Mr. E prompt checks**, **2,205/2,205 legacy math checks**, **104/104 application checks**, and **29/29 local Chromium UI/tutor checks**. These are separate suites; they should not be summed into a new unique total. See [MR-E.md](MR-E.md).
