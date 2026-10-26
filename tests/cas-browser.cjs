@@ -1,0 +1,27 @@
+const assert=require('assert'),path=require('path');
+const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES ? process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright' : 'playwright');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']});let checks=0;
+try{for(const width of [390,1366]){const page=await browser.newPage({viewport:{width,height:900}});const errors=[],network=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))network.push(r.url());});
+await page.goto('file://'+path.resolve(__dirname,'../index.html'));
+const check=(condition,message)=>{assert(condition,message);checks++;};
+check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow');
+await page.locator('#casOperation').selectOption('factor');await page.locator('#casRun').click();await page.waitForFunction(()=>document.querySelector('#casResult').textContent.includes('Result:'));
+check((await page.locator('#casResult').innerText()).includes('(-3+x)*(3+x)'),'Worker factors polynomial');
+await page.locator('#casTeach').click();check((await page.locator('#tutorResult').innerText()).includes('Step 1 of 3'),'Teach selected operation');
+await page.locator('#tutorialNext').click();check((await page.locator('#tutorResult').innerText()).includes('Step 2 of 3'),'Next');
+await page.locator('#tutorialBack').click();check((await page.locator('#tutorResult').innerText()).includes('Step 1 of 3'),'Back');
+await page.locator('#tutorialRun').click();await page.waitForFunction(()=>document.querySelector('#casResult').textContent.includes('Result:'));
+check((await page.locator('#casResult').innerText()).includes('(-3+x)*(3+x)'),'Runnable tutorial');
+const ask=async q=>{await page.locator('#prompt').fill(q);await page.locator('#ask').click();return page.locator('#tutorResult').innerText();};
+for(const name of await page.evaluate(()=>Object.keys(MRE_FUNCTIONS)))check((await ask('how do I use '+name+'?')).includes('Step 1 of 3'),'Tutorial '+name);
+await ask('tutorial sin');check((await ask('run example')).includes('0.5'),'Numeric tutorial example');
+check((await ask('tutorial unknown')).includes('do not have an exact tutorial'),'Unknown topic');
+await ask('stop tutorial');check((await ask('next')).includes('Start with'),'Stopped');
+check((await page.evaluate(()=>MitchellTech.cas('solve(x^2+1=0,x)'))).result==='[i,-i]','Async API complex solution');
+check((await page.evaluate(()=>MitchellTech.cas('importScripts(1)'))).ok===false,'Unsafe syntax rejected');
+check((await page.evaluate(async()=>{const p=MitchellTech.cas('sum(k,k,1,100000000)');MitchellTech.cancelCAS();return await p;})).error==='Calculation cancelled.','Cancel');
+check((await page.evaluate(()=>MitchellTech.cas('2+2'))).result==='4','Recovery after cancel');
+check((await page.evaluate(()=>MitchellTech.calculate('sin(30)',{angle:'deg'}))).value===0.49999999999999994,'Numeric DEG unchanged');
+check(errors.length===0,errors.join('\n'));check(network.length===0,'Offline: no HTTP requests');
+if(process.env.CAS_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.CAS_SCREENSHOT_DIR,'cas-'+width+'.png'),fullPage:true});await page.close();}}
+finally{await browser.close();}console.log(checks+' Chromium CAS/tutorial checks passed');})().catch(e=>{console.error(e);process.exitCode=1});

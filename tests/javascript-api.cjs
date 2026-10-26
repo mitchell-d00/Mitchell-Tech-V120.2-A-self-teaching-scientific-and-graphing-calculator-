@@ -13,7 +13,7 @@ const API=sandbox.window.MitchellTech;
 let cases=0;function check(title,condition){assert(condition,title);cases++}
 function ok(response,title){check(title, response&&response.ok===true);return response}
 function bad(response,title,pattern){check(title,response&&response.ok===false&&pattern.test(response.error||''))}
-check('API published under a stable name',API&&API.version==='1.0.0');
+check('API published under a stable name',API&&API.version==='1.1.0');
 check('API is frozen',Object.isFrozen(API));
 check('functions discoverable',API.functions().includes('atan2')&&API.functions().includes('sin'));
 check('capabilities discoverable',API.capabilities.includes('askMrE')&&API.capabilities.includes('addGraph'));

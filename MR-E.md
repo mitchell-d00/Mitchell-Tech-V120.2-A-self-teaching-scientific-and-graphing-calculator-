@@ -63,3 +63,36 @@ The new `mr-e-checks.cjs` verifies coverage of all supported function references
 Mr. E is a deterministic, local **rules-based teacher**, not a general-purpose LLM or a system that trains itself. It can explain many supported functions and individual expressions but cannot guarantee coverage or correctness of every mathematical topic, proof, or imported test. Symbolic differentiation supports a subset of functions; numerical root and integral routines have convergence, domain, and precision limits. The test importer treats JSON as external data, never executable code, and tutor output is placed into the page using text content rather than untrusted HTML. Device-to-device persistence still requires exporting and importing the workspace JSON.
 
 The JavaScript and topic reference remain inline in `index.html` to keep the whole tool offline-capable. Add new *distinct* examples to `tests/mr-e-checks.cjs` whenever a lesson, calculation method, or test interpretation changes.
+
+## Computer algebra and guided tutorials (26 October 2026)
+
+The new **Computer algebra** panel embeds Nerdamer 1.1.13 (Algebra, Calculus, Solve and Extra) inside the HTML. It works without a CDN or server. Select an operation to load its example, then choose **Run CAS** or **Mr. E: teach this**.
+
+18 guided operations cover simplification, expansion, factoring, equation solving (including complex candidates), systems, differentiation, symbolic and definite integration, limits, finite sums/products, substitution, determinants, inverse/transpose matrices, partial fractions and Laplace/inverse Laplace transforms.
+
+Try `how do I use sin?`, `tutorial factor`, `tutorial CAS`, `tutorial memStore`, `teach cas limit`, or `list tutorials`. All 25 existing function/operator references and all CAS operations have guided tutorials. Existing topic lessons and controls can also be opened by exact name/ID. **Next step**, **Back**, **Run example** and **Stop tutorial** operate the active tutorial. Numeric examples use the current RAD/DEG mode and report it; CAS examples run in the CAS panel. Lessons about controls/topics provide instructions rather than automatically manipulating controls. Unknown requests explicitly report missing coverage.
+
+Useful CAS commands:
+
+```text
+factor(x^2-9)
+expand((x+2)^3)
+solve(x^2+1=0,x)
+system(x+y=3; x-y=1)
+diff(sin(x)*x^2,x)
+integrate(x^2,x)
+defint(x^2,0,3,x)
+limit(sin(x)/x,x,0)
+sum(k^2,k,1,5)
+substitute(x^2+y,x,3)
+determinant(matrix([1,2],[3,4]))
+partfrac(1/(x^2-1),x)
+```
+
+`cas <command>` in Mr. E starts the operation and displays its result in Computer algebra. `list CAS functions` lists the guided command examples. General expressions accept the engine's supported mathematical functions through an explicit allowlist; JavaScript, assignments and arbitrary engine commands are not accepted.
+
+CAS is a separate symbolic mode: **radians only**, arbitrary symbols, exact rational arithmetic and complex values. It does not read `ans`, `mem`, sliders or the numeric calculator's angle setting. `ln` means natural logarithm; `log` and `log10` mean base ten. Base-ten logarithms are preserved as exact natural-log ratios (for example `ln(1000)/ln(10)`), rather than forced into floating-point approximations. Natural logarithms in results are displayed as `ln`.
+
+This is broad computer algebra support, not a promise to solve every problem. Preserve restrictions from the original expression after cancellation; add **+ C** to indefinite integrals; verify roots by substitution. Solver results may be incomplete, branch/domain and convergence conditions are not automatically certified, and unsupported integrals/transforms may remain unevaluated. Definite integration can use approximate numerical methods. The engine may leave expressions such as `factorial(1)` symbolic. Numeric graphing retains the original real-valued engine.
+
+Each CAS request runs in a fresh Web Worker, with **Cancel** and an eight-second timeout. Starting another request cancels the previous one. This also resets engine variables between requests. Inputs are limited to 1,000 characters and 40 nested groups; systems accept 2–6 equations. Tutorial state and CAS output stay in the current tab and are not included in workspace backups. Browsers must permit Blob workers.

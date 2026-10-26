@@ -85,3 +85,15 @@ node tests/full-spectrum.cjs
 ```
 
 The Node.js API tests require no packages. The Python smoke test needs Playwright and a locally installed Chromium executable (`/usr/bin/chromium`) and uses isolated browser storage rather than the hosted GitHub Pages origin. The installed app itself does not need Node or Python.
+
+## Symbolic API (1.1.0)
+
+```js
+await MitchellTech.cas('factor(x^2-9)');
+// { ok: true, result: '(-3+x)*(3+x)' }
+await MitchellTech.cas('system(x+y=3;x-y=1)');
+MitchellTech.casOperations(); // names, runnable examples, teaching guidance
+MitchellTech.cancelCAS();    // cancels the current symbolic request
+```
+
+`cas()` returns a Promise containing `{ok:true,result:string}` or `{ok:false,error:string}`. It uses a fresh offline worker, shares one active request with the UI, and cancels previous work on a new request. The timeout is eight seconds. CAS is separate from numeric `calculate`, `differentiate` and `integrate`: radians, symbolic variables, complex values, and the limitations documented in MR-E.md apply. `askMrE('tutorial factor')` returns the current guided step. `askMrE('cas ...')` and `askMrE('run example')` can start work in the CAS panel; use `await cas(...)` to obtain the computed result programmatically.

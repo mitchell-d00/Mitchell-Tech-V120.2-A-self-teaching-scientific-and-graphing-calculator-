@@ -59,3 +59,11 @@ This is a local-first scientific calculator and rules-based math tutor. An exter
 ## Mr. E teaching and benchmark imports
 
 `index.html` now contains `MRE_FUNCTIONS` (function reference), `MRE_TOPICS` (lessons), `mreGraphExplain`, `mrePracticeStart`, `mreBenchmarkExplanation`, and `mreTutor`. The older explicit command tutor is wrapped rather than replaced, keeping existing `solve`, `differentiate`, `integrate`, `plot`, and `recall` behavior. Maintain the app as a self-contained HTML file; imported benchmark JSON is read as local data only and has size, ID, and uniqueness checks. Keep answer rendering through `textContent`. Tests: `node tests/mr-e-checks.cjs`; documentation: [MR-E.md](MR-E.md).
+
+## Embedded CAS and tutorial runner
+
+`CAS_ENGINE_SOURCE` contains the unmodified npm `nerdamer@1.1.13/all.min.js` encoded as a JavaScript string. Its MIT notice is embedded and repeated in THIRD-PARTY-NOTICES.md. Do not remove the notice. No runtime network request or package installation is needed. Application code remains readable outside that vendor string.
+
+`casKernel` is serialized into a disposable worker and must not close over page variables. It validates the input, adapts logarithm notation, and handles system/substitution wrappers. The engine's `rationalize` operation is deliberately not exposed; its semantics are unsuitable for a denominator-rationalization lesson. `casCompute` manages cancellation, cleanup and timeout; `casRun` renders via textContent. `CAS_OPERATIONS` is the shared UI/tutorial directory. Function tutorials use `MRE_FUNCTIONS`; topic and control tutorials reuse MRE_TOPICS and HELP. No generated text is presented as a symbolic derivation trace.
+
+Run `node tests/cas-checks.cjs`, `node tests/mr-e-checks.cjs`, and existing regression suites. `node tests/cas-browser.cjs` additionally requires Playwright and Chromium; set CHROMIUM_EXECUTABLE to an installed browser if necessary. It checks local-file workers, cancellation, API, tutorial navigation, function coverage and narrow/wide layouts without external requests.

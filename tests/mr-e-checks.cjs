@@ -38,6 +38,19 @@ for(const [q,v] of [
  ['explain 4!','Answer: 24'],
  ['tell me a joke','explicit commands']
 ]) verify(q,v,'Applied teaching');
+for (const name of Object.keys(run('MRE_FUNCTIONS')))
+ verify('how do I use '+name+'?', 'Step 1 of 3', 'Guided function tutorials');
+for (const name of Object.keys(run('CAS_OPERATIONS')))
+ verify('tutorial '+name, 'Step 1 of 3', 'CAS tutorials');
+verify('next', 'Step 2 of 3', 'Tutorial navigation');
+verify('back', 'Step 1 of 3', 'Tutorial navigation');
+verify('repeat', 'Step 1 of 3', 'Tutorial navigation');
+verify('tutorial memStore', 'Step 1 of', 'Control tutorial');
+verify('tutorial imaginaryFeature', 'do not have an exact tutorial', 'Unknown tutorial');
+verify('stop tutorial', 'Tutorial stopped', 'Tutorial navigation');
+verify('next step', 'Start with', 'Tutorial navigation');
+verify('list tutorials', 'determinant', 'Tutorial directory');
+verify('list CAS functions', 'partfrac', 'CAS directory');
 const functionCoverage=run('[...FUNCS].every(f => !!MRE_FUNCTIONS[f])');
 assert(functionCoverage,'Every calculator function must have a Mr. E explanation');
 assert.equal(asked.size,results.length);

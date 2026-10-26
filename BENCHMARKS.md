@@ -72,3 +72,22 @@ DEG-mode `atan2` and tangent singularities are now corrected and regression-test
 **69 / 69 distinct tutoring prompts passed** in `tests/mr-e-checks.cjs`, covering every supported function reference, all 20 built-in topics, practice, graph explanations, distinct imported report entries, and import validation. The updated app also passed **2,205 / 2,205 cases in the original, non-deduplicated fixed-case harness**, **104 / 104 application checks**, and **29 / 29 local Chromium behavior checks**. This is a separate tutor-update run; the earlier 22,242/22,242 extended benchmark result was **not rerun in full** for this change. See [MR-E.md](MR-E.md).
 
 Test explanations are derived from the imported `name`, `category`, `actual`, `expected`, and `pass` fields plus supported local math rules. Loading a record does **not** independently validate that record's original outcome. Unsupported expressions receive a limitation message rather than invented mathematical proof.
+
+## Offline CAS and guided tutorials — 26 October 2026
+
+Revision: feature/offline-cas-mr-e-tutorials (embedded Nerdamer 1.1.13; API 1.1.0).
+
+| Gate | Result |
+| --- | --- |
+| Existing unique benchmark runner | 22,242 / 22,242 |
+| Fixed full-spectrum runner | 2,203 / 2,203 unique questions |
+| Application checks | 104 / 104 |
+| Mr. E prompt tests, including new CAS lessons and tutorial navigation | 139 / 139 unique prompts |
+| JavaScript API | 78 assertions across 22 distinct expressions |
+| Clear controls | 25 / 25 |
+| CAS mathematical results and input validation | 36 / 36 |
+| CAS worker execution, cancellation, supersession, eight-second timeout and recovery | 10 / 10 assertions using Node worker_threads |
+
+Counts from different runners overlap; do not add them into a claimed unique total. Worker tests execute the exact Blob worker source under a browser-like Node worker shim, not a browser. No engine timings or universal symbolic correctness claims are made.
+
+**Browser verification pending:** Playwright's Chromium download returned an invalid archive. An alternate Chromium 153 package downloaded, but exited with SIGTRAP before opening a page in this environment. The new `tests/cas-browser.cjs` is provided but has not passed here. Review must verify 390px/1366px layout, actual local-file and hosted-origin Blob-worker support, tutorial buttons, offline requests and cancellation before release. No hosted deployment or mobile Safari/Firefox verification was performed for this change.
