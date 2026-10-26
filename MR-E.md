@@ -2,11 +2,20 @@
 
 Mr. E is the expanded offline teaching interface in **Mitchell Tech V120.2**. It remains embedded in the single `index.html` file: **no external API, language model, account, or internet connection is needed** to ask supported questions.
 
+## Two calculation interfaces
+
+The original `differentiate` tutor command uses symbolic rules with steps; `integrate … from … to …` uses numerical Simpson integration. Those commands remain available alongside the new symbolic CAS.
+
+For symbolic algebra, enter **`cas factor(x^2-4)`**, **`cas expand((x+1)^3)`** or **`cas integrate(x^2,x)`** in Mr. E. Results appear in the **Computer algebra** panel. A bare prompt such as `factor x^2-4` is not a recognized command. You can also enter `factor(x^2-4)` directly in that panel, or use `await MitchellTech.cas('factor(x^2-4)')` in the page console. An indefinite CAS integral returns an antiderivative; add `+ C` for the general family.
+
+For guided teaching, ask `tutorial factor`, then use Next step, Back and Run example. Tutorials explain methods and examples; they do not produce a derivation trace for every CAS result.
+
 ## What Mr. E teaches
 
 - **25 function/operator explanations:** `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sinh`, `cosh`, `tanh`, `sqrt`, `cbrt`, `abs`, `ln`, `log`, `exp`, `floor`, `ceil`, `round`, `sign`, `min`, `max`, `pow`, `factorial`, and postfix `%` (called `percent` in the reference).
 - **20 local teaching topics:** arithmetic, fractions, percentages, negatives, powers, roots, trigonometry, logarithms, equations, functions/domains, Cartesian graphing, polar coordinates, parametric curves, derivatives, integrals, statistics basics, calculator controls, local memory, and benchmark interpretation. Related words can map to a lesson.
-- **Worked calculations:** Reuses the calculator's expression parser, numeric evaluator, linear/quadratic solver, symbolic derivatives, numerical integration, and closed local source recall.
+- **Symbolic CAS:** Simplification, expansion, factoring, equation systems, symbolic integration and other operations through the `cas` command and Computer algebra panel; see the CAS section below for limits.
+- **Original worked calculations:** Reuses the calculator's expression parser, numeric evaluator, linear/quadratic solver, symbolic derivatives, numerical integration, and closed local source recall.
 - **Graph walkthroughs:** Explains how to plot a Cartesian expression, shows example `x→y` points, identifies a sampled y-intercept, flags possible symmetry *without claiming a proof*, and connects the graph to Trace, f′, and the numerical lab.
 - **Practice:** Distinct prompts for major topics, simple answer checking, hints, and a shown solution. The current practice task is held in the active browser tab; it is not an adaptive AI tutor.
 

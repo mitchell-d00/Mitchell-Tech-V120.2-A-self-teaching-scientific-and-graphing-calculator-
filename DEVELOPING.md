@@ -2,7 +2,7 @@
 
 ## Core constraint: it stays a single HTML file
 
-Open `index.html` in a browser. This is the complete application: no bundler, Node runtime, cloud account, API key, external framework, or hosted dependencies are required to use it. Node.js is only used for optional development tests. Both the `<style>` and `<script>` blocks are formatted for human review instead of being compressed into thousand-character lines.
+Open `index.html` in a browser. This is the complete application: no bundler, Node runtime, cloud account, API key, external framework, or hosted dependencies are required to use it. Node.js is only used for optional development tests. Application styles and JavaScript are formatted for human review. The bundled minified Nerdamer engine is the exception: it is embedded as the `CAS_ENGINE_SOURCE` string for offline workers.
 
 ## Navigating the source
 
@@ -26,7 +26,7 @@ The calculator panel intentionally comes first in the DOM and responsive layout;
 - Tangent is undefined at odd multiples of 90 degrees. The evaluator uses `NaN` for those near-axis singularities; the UI reports undefined rather than a misleading large finite answer.
 - The `TRIG_AXIS_EPS` threshold is measured in radians; beware of very large arguments where floating-point input precision already limits reliable range reduction.
 - Derivative `x^x` may be simplified to `x^x * (ln(x) + 1)` only in the real domain `x>0`. Keep derivative rules domain-conscious rather than simplifying arbitrary rational factors with an unknown zero denominator.
-- Distinguish display precision, approximate numeric accuracy, and symbolic correctness. The engine uses ordinary JavaScript floating-point numbers, **not arbitrary precision arithmetic**.
+- Distinguish display precision, approximate numeric accuracy, and symbolic correctness. The original numerical calculator/graphing engine uses ordinary JavaScript floating-point numbers, **not arbitrary precision arithmetic**. The separate Nerdamer CAS supports exact rational/symbolic expressions, but some operations still use numerical approximation; do not describe every CAS result as exact.
 
 ## Reproducible checks
 
