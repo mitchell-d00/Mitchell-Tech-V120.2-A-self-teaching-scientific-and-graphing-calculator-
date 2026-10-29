@@ -18,15 +18,17 @@ jobs:
   calculator-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      CODEX_PRIMARY_RUNTIME_NODE_MODULES: ${{ runner.temp }}/mitchell-tech-browser/node_modules
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/mitchell-tech-browsers
-      CAS_SCREENSHOT_DIR: ${{ runner.temp }}/mitchell-tech-screenshots
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Configure temporary browser paths
+        run: |
+          printf '%s\n' \
+            "CODEX_PRIMARY_RUNTIME_NODE_MODULES=$RUNNER_TEMP/mitchell-tech-browser/node_modules" \
+            "PLAYWRIGHT_BROWSERS_PATH=$RUNNER_TEMP/mitchell-tech-browsers" \
+            "CAS_SCREENSHOT_DIR=$RUNNER_TEMP/mitchell-tech-screenshots" >> "$GITHUB_ENV"
       - name: Install test-only Playwright and its matching Chromium
         run: |
           npm install --prefix "$RUNNER_TEMP/mitchell-tech-browser" --no-save --package-lock=false playwright@1.58.0
