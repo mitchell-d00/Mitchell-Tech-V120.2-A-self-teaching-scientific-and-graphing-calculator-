@@ -114,6 +114,14 @@ become an application runtime requirement. Check the workflow result for the
 specific candidate commit; merely having YAML is not a passing test or configured
 branch-protection rule. Hosted-origin/reload/backup checks below remain separate.
 
+**Verified 2026-10-29:** [Actions run 40881450054](https://github.com/mitchell-d00/Mitchell-Tech-V120.2-A-self-teaching-scientific-and-graphing-calculator-/actions/runs/40881450054)
+passed all eight Node suites and **82 Chromium CAS/tutorial checks** at 390px
+and 1366px. It installed Chrome/Headless Shell **145.0.7632.6**, Playwright
+revision **1208**, using pinned Playwright 1.58.0. Tested candidate:
+`628375c440bdf8a2326e98b4f9b4a5113ab0e3ab`. This is successful automated browser
+installation/execution on the Ubuntu runner, separate from earlier local startup
+failures and from testing a deployed origin.
+
 ## Hosted and portability checklist
 
 Separately check the [live site](https://mitchell-d00.github.io/Mitchell-Tech-V120.2-A-self-teaching-scientific-and-graphing-calculator-/):

@@ -88,3 +88,14 @@ suites plus the real local-file browser harness, and preserves reports/screensho
 Its result belongs to the candidate commit tested. It does not configure required
 branch checks, deploy the app, or verify hosted persistence. The live source
 comparison above records the existing published page only.
+
+### CI outcome
+
+After correcting runner-specific path setup in the first workflow draft,
+[Actions run 40881450054](https://github.com/mitchell-d00/Mitchell-Tech-V120.2-A-self-teaching-scientific-and-graphing-calculator-/actions/runs/40881450054)
+passed for candidate `628375c440bdf8a2326e98b4f9b4a5113ab0e3ab`: all eight Node
+suites plus **82 / 82 Chromium CAS/tutorial checks** at 390px and 1366px.
+Playwright 1.58.0 installed Chrome/Headless Shell 145.0.7632.6 (revision 1208)
+and Linux dependencies successfully. This verifies the new automatic browser
+setup and existing local-file harness on Ubuntu, rather than claiming the local
+workspace startup failures were resolved or the hosted origin was exercised.

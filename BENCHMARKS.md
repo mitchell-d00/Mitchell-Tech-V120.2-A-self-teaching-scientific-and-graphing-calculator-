@@ -28,9 +28,21 @@ The CAS browser harness initially found no executable. After obtaining and
 validating a matching official Chrome-for-Testing archive, local startup failed
 with `SIGTRAP`; a serverless build also failed. A new validation workflow installs
 Playwright/Chromium on its Ubuntu runner and records its own candidate result.
-Python browser harnesses were not rerun locally. No local fresh browser UI, hosted persistence,
+Python browser harnesses were not rerun locally. No hosted persistence,
 cross-device restoration, Safari/Firefox, or mobile-hardware pass is claimed.
 See [testing commands](TESTING.md) and the [dated documentation review](DOCUMENTATION_AUDIT_2026-10-29.md).
+
+### Successful CI browser installation and verification
+
+[Actions run 40881450054](https://github.com/mitchell-d00/Mitchell-Tech-V120.2-A-self-teaching-scientific-and-graphing-calculator-/actions/runs/40881450054)
+passed the eight Node suites and **82 / 82 real Chromium CAS/tutorial checks**.
+Candidate: `628375c440bdf8a2326e98b4f9b4a5113ab0e3ab`. Test dependency:
+Playwright **1.58.0**; installed Chrome/Headless Shell **145.0.7632.6**, revision
+**1208**. The runner installed the browser and Linux dependencies before testing,
+resolving the missing-executable prerequisite in CI. The harness opened local
+HTML at 390px/1366px, checked actual workers/tutorial interactions, rejected
+unsafe syntax, verified cancellation/recovery, and observed no HTTP requests.
+It did not test the deployed origin, reload/backup portability, or other browsers.
 
 The remaining sections retain earlier results and limitations. Words such as
 “current” within a dated historical section refer to that section's revision,

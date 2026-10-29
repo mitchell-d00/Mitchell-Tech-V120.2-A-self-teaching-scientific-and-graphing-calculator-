@@ -80,11 +80,11 @@ await mt.cas('integrate(x^2,x)'); // {ok:true, result:'(1/3)*x^3'}; add + C
 
 On 29 October 2026, the downloaded live HTML matched the repository source
 byte for byte and all eight Node suites passed, including 22,242 unique benchmark
-questions. Counts across suites overlap and must not be summed. Local Chromium
-installation exposed a startup crash after resolving the missing executable.
-The added [CI workflow](.github/workflows/calculator-checks.yml) installs its own
-matching browser and runs the CAS/tutorial checks. Source/HTTP checks alone do
-not certify browser behavior. See the dated review and
+questions. The new [CI workflow](.github/workflows/calculator-checks.yml) also
+installed its matching Chromium successfully and passed **82 real-browser CAS
+and tutorial checks** at 390px and 1366px. Counts across suites overlap and must
+not be summed. These browser tests open the local HTML; hosted persistence and
+cross-device restoration remain separate checks. See the dated review and
 [benchmark history](BENCHMARKS.md) for exact evidence and limits.
 
 ## Licence
