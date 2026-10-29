@@ -29,9 +29,10 @@ mt.functions();                           // supported math functions
 mt.calculate('sqrt(144)+2^3');            // {ok:true, value:20, formatted:'20', ...}
 mt.calculate('sin(30)', {angle:'deg'});     // approx. 0.5; workspace angle unchanged
 mt.askMrE('teach graphing');              // {ok:true, answer:'Mr. E ...'}
-mt.addGraph('x^2-4');                     // adds a visible Cartesian graph
+const added = mt.addGraph('x^2-4');       // adds a visible Cartesian graph
+if (!added.ok) throw new Error(added.error);
 mt.listGraphs();                          // copies of current graph records
-mt.sampleGraph(1, 3);                    // {ok:true, x:3, y:5, ...}
+mt.sampleGraph(added.index, 3);           // {ok:true, x:3, y:5, ...}
 mt.differentiate('x^3');                  // symbolic derivative where supported
 mt.integrate('x^2', 0, 3);                // numerical integral ≈ 9
 mt.findRoots('x^2-4', -3, 3);             // numerical roots ≈ [-2,2]
@@ -40,7 +41,9 @@ await mt.cas('integrate(x^2,x)');         // {ok:true, result:'(1/3)*x^3'}; add 
 mt.casOperations();                       // guided CAS operations and examples
 ```
 
-The `sampleGraph(1,3)` example assumes the initial built-in graph remains at index `0`. Indices are zero-based. Use the index returned from `addGraph` rather than guessing it in automation.
+Indices are zero-based and can change after removal. Use the index returned from
+`addGraph` and refresh `listGraphs()` after edits rather than assuming the default
+workspace is still loaded. Adding a graph can fail when the 12-rule limit is reached.
 
 ## Capabilities and responses
 
@@ -65,6 +68,12 @@ The `sampleGraph(1,3)` example assumes the initial built-in graph remains at ind
 | `findRoots(expression, from, to)` | Expression and increasing finite bounds | Searches numerically for real roots; no completeness guarantee |
 
 `cas(expression)` returns a Promise; await it to receive `{ok:true,result:string}` or `{ok:false,error:string}`. The existing methods in the table above remain synchronous.
+
+Direct `cas()` returns data without writing the Computer algebra result panel;
+the UI uses its separate `casRun` renderer. It still shares the active worker with
+UI requests and can cancel them. `askMrE('cas ...')` starts that UI route and
+returns only an acknowledgement. Use the Promise-returning method for a computed
+result in scripts.
 
 | CAS method | Input | Response / behavior |
 | --- | --- | --- |
@@ -96,6 +105,12 @@ The browser agent needs access to that **page context**; it does **not** need an
 
 ### Persistence and trust
 
+`getState()` is an inspection snapshot, not a complete notebook backup. There is
+no public API method for importing/exporting the entire workspace; use the UI's
+JSON workflow described in [BACKUPS.md](BACKUPS.md). CAS output, active tutorial,
+practice state, and imported benchmark records are tab-local. The original
+`differentiate()` respects the current angle mode; CAS uses radians regardless.
+
 `calculate()` (default), `sampleGraph`, `differentiate`, `integrate` and `findRoots` do not modify the current calculator history. `calculate(...,{record:true})` and graph editing commands change the current workspace and use its existing autosave behavior. `askMrE` is a *command dispatcher*, not strictly read-only: asking it to `plot` adds a graph, and practice commands maintain local tutor state. The JavaScript API is not exposed as a network service and cannot access someone else's private browser storage across origins. It does not install a background agent.
 
 ## Repeatable tests
@@ -112,7 +127,14 @@ node tests/clear-controls.cjs
 node tests/full-spectrum.cjs
 ```
 
-The Node API, CAS math and worker tests require no additional packages. `tests/cas-browser.cjs` requires Playwright and Chromium; optionally set `CHROMIUM_EXECUTABLE`. Browser checks remain pending for the CAS release; see BENCHMARKS.md. The Python smoke test needs Playwright and a locally installed Chromium executable (`/usr/bin/chromium`) and uses isolated browser storage rather than the hosted GitHub Pages origin. The installed app itself does not need Node or Python.
+The Node API, CAS math and worker tests require no additional packages.
+`tests/cas-browser.cjs` needs Node Playwright and Chromium; optionally set
+`CHROMIUM_EXECUTABLE`. It opens the local file, not the hosted origin. The Python
+smoke test needs Python Playwright and Chromium at `/usr/bin/chromium`, injects
+local HTML, and replaces storage with an isolated double. See [TESTING.md](TESTING.md)
+for the full eight-suite Node sequence, all browser prerequisites and generated
+reports, and [BENCHMARKS.md](BENCHMARKS.md) for dated results. The app itself needs
+neither Node nor Python.
 
 ## Symbolic API (1.1.0)
 
@@ -133,5 +155,11 @@ Use command syntax such as `factor(x^2-4)`, `expand((x+1)^3)`, `integrate(x^2,x)
 `cas()` accepts 1–1,000 characters, at most 40 nested groups, and 2–6 equations in a system. Its eight-second timeout and `cancelCAS()` terminate the worker. Failed, cancelled and timed-out requests resolve to an error object. Starting a new request cancels the previous one, including requests started through the UI. CAS state and results are not saved in workspace backups.
 
 CAS uses radians, symbolic variables, exact rational expressions and complex values. It does not read calculator memory, `ans`, sliders or the RAD/DEG setting. Input/output `ln` means natural log; input `log`/`log10` means base ten and may be returned as an exact ratio of natural logs.
+
+The original numeric parser and CAS have different function/operator sets. For
+example, CAS uses `factorial(n)` instead of postfix `!` and has no `%` input;
+numeric `atan2`, `cbrt`, `sign`, and `pow` are not exposed as CAS function calls by
+this wrapper. Use `casOperations()` for guided keys: `ilaplace` is a directory key
+whose runnable example uses the actual engine command `ilt(...)`.
 
 `ok:true` means the engine returned an expression; it does not certify that every requested operation was evaluated, every solution found, or a proof established. Preserve original domain exclusions after cancellation; check solution candidates and branch conditions. Indefinite integration returns an antiderivative without an appended `+ C`; callers must supply that arbitrary constant when presenting the general family. Definite CAS integration may be approximate, and convergence conditions are not certified automatically. CAS results do not include the original differentiator's recorded teaching steps. See [MR-E.md](MR-E.md) for full guidance.
