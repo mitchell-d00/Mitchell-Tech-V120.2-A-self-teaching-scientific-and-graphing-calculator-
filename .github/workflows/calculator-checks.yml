@@ -1,0 +1,58 @@
+name: Validate calculator and Chromium
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: calculator-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calculator-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CODEX_PRIMARY_RUNTIME_NODE_MODULES: ${{ runner.temp }}/mitchell-tech-browser/node_modules
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/mitchell-tech-browsers
+      CAS_SCREENSHOT_DIR: ${{ runner.temp }}/mitchell-tech-screenshots
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install test-only Playwright and its matching Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/mitchell-tech-browser" --no-save --package-lock=false playwright@1.58.0
+          node "$CODEX_PRIMARY_RUNTIME_NODE_MODULES/playwright/cli.js" install --with-deps chromium
+      - name: Run calculator, tutor, API, and CAS regressions
+        run: |
+          node tests/full-spectrum.cjs
+          node tests/application-checks.cjs
+          node tests/unique-benchmarks.cjs
+          node tests/mr-e-checks.cjs
+          node tests/javascript-api.cjs
+          node tests/clear-controls.cjs
+          node tests/cas-checks.cjs
+          node tests/cas-worker.cjs
+      - name: Exercise offline CAS and tutorials in real Chromium
+        run: |
+          mkdir -p "$CAS_SCREENSHOT_DIR"
+          node tests/cas-browser.cjs
+      - name: Preserve generated reports and browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-validation-${{ github.run_id }}
+          path: |
+            tests/full-spectrum-results.json
+            tests/unique-benchmarks-results.json
+            tests/mr-e-results.json
+            ${{ runner.temp }}/mitchell-tech-screenshots/
+          if-no-files-found: warn

@@ -13,7 +13,7 @@ For guided teaching, ask `tutorial factor`, then use Next step, Back and Run exa
 ## What Mr. E teaches
 
 - **25 function/operator explanations:** `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sinh`, `cosh`, `tanh`, `sqrt`, `cbrt`, `abs`, `ln`, `log`, `exp`, `floor`, `ceil`, `round`, `sign`, `min`, `max`, `pow`, `factorial`, and postfix `%` (called `percent` in the reference).
-- **20 local teaching topics:** arithmetic, fractions, percentages, negatives, powers, roots, trigonometry, logarithms, equations, functions/domains, Cartesian graphing, polar coordinates, parametric curves, derivatives, integrals, statistics basics, calculator controls, local memory, and benchmark interpretation. Related words can map to a lesson.
+- **19 base teaching topics:** arithmetic, fractions, percentages, negatives, powers, roots, trigonometry, logarithms, equations, functions/domains, Cartesian graphing, polar coordinates, parametric curves, derivatives, integrals, statistics basics, calculator controls, local memory, and benchmark interpretation. Related words can map to a lesson.
 - **Symbolic CAS:** Simplification, expansion, factoring, equation systems, symbolic integration and other operations through the `cas` command and Computer algebra panel; see the CAS section below for limits.
 - **Original worked calculations:** Reuses the calculator's expression parser, numeric evaluator, linear/quadratic solver, symbolic derivatives, numerical integration, and closed local source recall.
 - **Graph walkthroughs:** Explains how to plot a Cartesian expression, shows example `x→y` points, identifies a sampled y-intercept, flags possible symmetry *without claiming a proof*, and connects the graph to Trace, f′, and the numerical lab.
@@ -54,7 +54,7 @@ The loader accepts up to **35,000 test records** in a JSON file smaller than 16 
 
 **Not every benchmark can be algebraically explained.** For example, a specialized graph root-search test may need an interval, and sampled/numerical work is not an exact proof. Mr. E reports when it cannot independently reproduce a test rather than inventing an explanation.
 
-## Independent Mr. E regression tests
+## Reproducible Mr. E regression tests
 
 ```sh
 node tests/mr-e-checks.cjs
@@ -63,11 +63,16 @@ node tests/application-checks.cjs
 node tests/unique-benchmarks.cjs
 ```
 
-The new `mr-e-checks.cjs` verifies coverage of all supported function references, all 20 teaching topics, distinct graph and math explanations, a practice session, and validation of imported benchmark records.
+`mr-e-checks.cjs` verifies supported function references, topic lessons, distinct graph/math explanations, practice, benchmark-record validation, and the newer CAS/tutorial routes. The current source has **19 base Mr. E topics**, plus **18 CAS topic entries** added at startup, **25 function/operator references**, and the separate **13-lesson progressive course**. Earlier prose called the base topics “20”; the source directory contains 19. These directories are different teaching surfaces, not one combined lesson count.
+
+See [TESTING.md](TESTING.md) for all eight Node suites and browser prerequisites,
+[USER_GUIDE.md](USER_GUIDE.md) for interface controls, and [BACKUPS.md](BACKUPS.md)
+for what is retained. These are developer-authored regression tests, not
+independent evaluation of teaching quality.
 
 **18 October 2026 local verification:** 69 / 69 *unique Mr. E prompt tests*, 2,205 / 2,205 checks using the original fixed-case legacy harness (before repository deduplication), 104 / 104 application checks, and 29 / 29 Chromium tutor/UI checks passed. Chromium tested locally injected HTML, **not the published GitHub Pages deployment**. The earlier 22,242 unique benchmark outcome remains a previously published result, not a claim that the complete extended suite was rerun for this tutor update.
 
-## Limitations worth knowing
+## Limitations
 
 Mr. E is a deterministic, local **rules-based teacher**, not a general-purpose LLM or a system that trains itself. It can explain many supported functions and individual expressions but cannot guarantee coverage or correctness of every mathematical topic, proof, or imported test. Symbolic differentiation supports a subset of functions; numerical root and integral routines have convergence, domain, and precision limits. The test importer treats JSON as external data, never executable code, and tutor output is placed into the page using text content rather than untrusted HTML. Device-to-device persistence still requires exporting and importing the workspace JSON.
 

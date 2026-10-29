@@ -1,1 +1,8 @@
+# Test directory
 
+Run from the repository root. See [TESTING.md](../TESTING.md) for the complete
+eight-suite Node sequence, three browser scripts, prerequisites, generated report
+files, and limits of each harness. [BENCHMARKS.md](../BENCHMARKS.md) separates
+current dated observations from historical reports. Original `cases.json` and
+the tracked `full-spectrum-results.json` are preserved rather than silently
+replaced by a local rerun.

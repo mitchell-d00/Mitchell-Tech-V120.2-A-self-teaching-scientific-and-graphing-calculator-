@@ -1,6 +1,46 @@
-# Unique-question benchmark report — 18 October 2026
+# Benchmark evidence and historical reports
 
-## Current verified status — correction release (18 October 2026)
+## Current documentation-review run — 29 October 2026
+
+Baseline source: `07693feaef5d589d1ad82f8488fd43f6d5537a60` (main after the
+offline CAS/tutorial update and its documentation clarification). Runtime HTML
+SHA-256: `7b673ae049997f6e14f0aadaf122f1efb85e44bcd6624c4f03311260750c1242`.
+The downloaded live HTML matched all 652,498 source bytes. This is artifact
+comparison, not execution of the hosted JavaScript.
+
+| Local Node suite | Result |
+|---|---|
+| Fixed full-spectrum | 2,203 / 2,203 unique questions; two duplicates skipped |
+| Application | 104 / 104 |
+| Extended unique benchmark | 22,242 / 22,242; two duplicates skipped |
+| Mr. E | 139 / 139 unique prompts |
+| JavaScript API | 78 assertions across 22 distinct expressions |
+| Selective clear controls | 25 / 25 |
+| CAS mathematical/validation | 36 / 36 |
+| CAS worker/lifecycle | 10 / 10, including the real eight-second timeout |
+
+All eight scripts exited successfully under Node.js 24.22.1. Suites overlap;
+these counts must not be added into one unique-question total. Original source
+cases and the tracked historical `full-spectrum-results.json` were preserved;
+fresh generated reports were inspected separately.
+
+The CAS browser harness initially found no executable. After obtaining and
+validating a matching official Chrome-for-Testing archive, local startup failed
+with `SIGTRAP`; a serverless build also failed. A new validation workflow installs
+Playwright/Chromium on its Ubuntu runner and records its own candidate result.
+Python browser harnesses were not rerun locally. No local fresh browser UI, hosted persistence,
+cross-device restoration, Safari/Firefox, or mobile-hardware pass is claimed.
+See [testing commands](TESTING.md) and the [dated documentation review](DOCUMENTATION_AUDIT_2026-10-29.md).
+
+The remaining sections retain earlier results and limitations. Words such as
+“current” within a dated historical section refer to that section's revision,
+not a new rerun of every observation. Earlier prose describing 20 base tutor
+topics was a count error; the source has 19 base topics, distinct from its course
+and CAS tutorial entries.
+
+## Historical unique-question report — 18 October 2026
+
+### Verified status at the correction release (18 October 2026)
 
 **22,242 / 22,242 globally unique mathematical and offline-tutor questions passed** (including 16 newly added, individually identified precision and symbolic-clarity regressions); only two duplicate *raw expressions* were excluded. The bundled engine/application check suite passed **104 / 104**. A separate Chromium run of the updated HTML passed **22 / 22** checks at 390px and 1366px (including calculator-first layout, exact trig-zero displays, undefined tangent, cleaner `x^x` tutor steps, and JS errors). The browser run used `page.set_content`, so **origin-bound storage after a real reload and the deployed GitHub Pages site were not reverified**.
 

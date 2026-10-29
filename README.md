@@ -4,6 +4,31 @@ An offline scientific calculator and graphing workbench with **symbolic computer
 
 [Open the live calculator](https://mitchell-d00.github.io/Mitchell-Tech-V120.2-A-self-teaching-scientific-and-graphing-calculator-/), or download `index.html` and open it in a modern browser that supports Blob workers.
 
+A fresh workspace starts in Standard mode with a sample `x+2` graph; saved work
+can restore a different setup. Choose
+**Scientific** or **My board** for advanced keys and the RAD/DEG control. The
+V120.2 application label, JavaScript API 1.1.0, bundled Nerdamer 1.1.13, and
+version-one notebook format are separate version identifiers.
+
+## Explore and save your work
+
+- Plot up to **12 Cartesian, polar, or parametric rules**; use sliders `a` and
+  `b`, drag/pinch navigation, Graph/Table, Trace, and numerical analysis.
+- Use **Teaching on**, **Explain a control**, and the **13 progressive lessons**
+  alongside Mr. E's topic/function/CAS tutorials. “Self-teaching” refers to local
+  lessons and rules; the app does not train or rewrite itself.
+- Save up to **50 named workspace snapshots** in this browser. Export a JSON
+  backup to transfer the current workspace, lesson progress, and personal/recent
+  recall pages. A backup does not contain every saved notebook or the current CAS
+  result; see [saving and file formats](BACKUPS.md).
+- **Crawl & recall** indexes this application's local guide, workspace, notebooks,
+  history, and personal pages. It does not crawl websites or arbitrary local files.
+  Matching uses weighted words, not the Combined MPLPB provenance engine or
+  independent fact checking.
+
+See the [user guide](USER_GUIDE.md) for controls, expression syntax, clearing,
+keyboard shortcuts, and troubleshooting.
+
 ## Numerical calculator and symbolic CAS
 
 The original calculator methods and the new **Computer algebra** panel have separate interfaces:
@@ -44,10 +69,25 @@ await mt.cas('integrate(x^2,x)'); // {ok:true, result:'(1/3)*x^3'}; add + C
 
 ## Documentation and verification
 
+- [User guide](USER_GUIDE.md): calculator, graphs, numerical lab, lessons, recall and settings.
+- [Saving and file formats](BACKUPS.md): autosave, named snapshots, JSON/PNG, limits and restore behavior.
 - [JavaScript API](JAVASCRIPT-API.md): method contracts, numerical/symbolic distinctions and examples.
 - [Mr. E guide](MR-E.md): lessons, tutorials, CAS syntax and limitations.
 - [Developing](DEVELOPING.md) and [Testing](TESTING.md): implementation and repeatable checks.
 - [Benchmarks](BENCHMARKS.md): measured results and outstanding verification.
 - [Third-party notices](THIRD-PARTY-NOTICES.md): bundled Nerdamer license.
+- [Documentation review — 29 October 2026](DOCUMENTATION_AUDIT_2026-10-29.md): source/live parity, corrections and checks actually run.
 
-The update is deployed to GitHub Pages. Automated math, tutor and worker checks passed as recorded in BENCHMARKS.md; visual/browser interaction verification for this update remains pending. Deployment success alone does not establish browser behavior or universal mathematical correctness.
+On 29 October 2026, the downloaded live HTML matched the repository source
+byte for byte and all eight Node suites passed, including 22,242 unique benchmark
+questions. Counts across suites overlap and must not be summed. Local Chromium
+installation exposed a startup crash after resolving the missing executable.
+The added [CI workflow](.github/workflows/calculator-checks.yml) installs its own
+matching browser and runs the CAS/tutorial checks. Source/HTTP checks alone do
+not certify browser behavior. See the dated review and
+[benchmark history](BENCHMARKS.md) for exact evidence and limits.
+
+## Licence
+
+[MIT](LICENSE), with the bundled Nerdamer notice retained in the HTML and
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

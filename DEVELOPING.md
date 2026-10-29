@@ -1,69 +1,105 @@
 # Developing Mitchell Tech V120.2
 
-## Core constraint: it stays a single HTML file
+[Overview](README.md) · [Testing](TESTING.md) · [API](JAVASCRIPT-API.md)
 
-Open `index.html` in a browser. This is the complete application: no bundler, Node runtime, cloud account, API key, external framework, or hosted dependencies are required to use it. Node.js is only used for optional development tests. Application styles and JavaScript are formatted for human review. The bundled minified Nerdamer engine is the exception: it is embedded as the `CAS_ENGINE_SOURCE` string for offline workers.
+## Keep the application self-contained
 
-## Navigating the source
+`index.html` contains the entire runnable application: markup, CSS, application
+JavaScript, built-in teaching data, and bundled Nerdamer 1.1.13. Opening it needs
+no bundler, Node runtime, API key, server, or dependency download. Node/Python and
+Playwright are development-test tools only. `logo.svg` is a repository asset;
+the HTML's runtime has no external asset references.
 
-| Area | Find these symbols / selectors in `index.html` | Responsibility |
-| --- | --- | --- |
-| Layout and responsive styles | `.layout`, `.calc`, `.functionpanel`, `@media` | Calculator-first desktop/mobile layouts; accessible controls |
-| Expression parser | `FUNCS`, `parse`, `evaluate`, `callFn` | Safe grammar and numeric evaluation; no `eval` |
-| Numeric output | `fmt`, `TRIG_AXIS_EPS`, `callFn` | Rounded display and domain-sensitive trig behavior |
-| Symbolic math | `simplify`, `deriv`, `show` | Rule-based derivative steps, e.g. `x^x` |
-| Graphs and analysis | `compile`, `draw`, `roots`, `integral` | Deterministic canvas rendering and numerical methods |
-| Calculator controls | `renderKeys`, `calcRun`, `refreshAngle` | On-screen input, history and RAD/DEG |
-| Offline tutor | `tutor`, `recallPages` | Explicit rules and local recall; no embedded LLM |
-| Storage and portability | `localStorage`, `persist`, `importFile`, `exportWorkspace` | Browser-local state plus transfer through saved JSON |
-
-The calculator panel intentionally comes first in the DOM and responsive layout; educational panels follow it. Keep that order when modifying the interface.
-
-## Numerical correctness policy
-
-- Angle mode applies to sine, cosine, tangent, inverse trig, **and `atan2`**.
-- At values *extremely close to exact multiples of 90 degrees (or π/2 radians)*, trig rounding artifacts are normalized only inside trigonometric functions. Do not use a global `Math.abs(x)<1e-12?0:x` display rule; it would hide legitimate small values.
-- Tangent is undefined at odd multiples of 90 degrees. The evaluator uses `NaN` for those near-axis singularities; the UI reports undefined rather than a misleading large finite answer.
-- The `TRIG_AXIS_EPS` threshold is measured in radians; beware of very large arguments where floating-point input precision already limits reliable range reduction.
-- Derivative `x^x` may be simplified to `x^x * (ln(x) + 1)` only in the real domain `x>0`. Keep derivative rules domain-conscious rather than simplifying arbitrary rational factors with an unknown zero denominator.
-- Distinguish display precision, approximate numeric accuracy, and symbolic correctness. The original numerical calculator/graphing engine uses ordinary JavaScript floating-point numbers, **not arbitrary precision arithmetic**. The separate Nerdamer CAS supports exact rational/symbolic expressions, but some operations still use numerical approximation; do not describe every CAS result as exact.
-
-## Reproducible checks
-
-From the repository root, with Node.js 22 or another recent supported Node.js release:
+For optional local HTTP serving from the repository root:
 
 ```sh
-node tests/full-spectrum.cjs
-node tests/application-checks.cjs
-node tests/unique-benchmarks.cjs
+python3 -m http.server 8000
 ```
 
-`tests/unique-benchmarks.cjs` is the recommended regression gate. It builds 20,000 deterministic generated expressions plus the fixed corpus, distinct tutor requests, angle-mode cases and 16 targeted regressions. Questions are normalized and deduplicated globally; each kept question has a stable `MT-` ID. Output goes to `tests/unique-benchmarks-results.json` with exact inputs, expected/actual values, failures, and duplicate skips. The process exits unsuccessfully when tests fail. The 18 October 2026 corrected source scored **22,242 / 22,242** with two repeated raw expressions skipped.
+Open <http://localhost:8000>. Choose an origin/profile intentionally when testing
+storage; local files, localhost, and GitHub Pages do not automatically share saves.
 
-The engine/application script passed **104 / 104**. Additional browser behavior was checked in Chromium at 390px and 1366px (**22 / 22**), but that browser check used locally injected HTML, *not the deployed web origin*. A proper release should also test persistence after a real reload, backup import/export roundtrips, browser permissions, mobile Safari and Firefox, and hosted GitHub Pages parity.
+## Source map
 
-## Suggested edit-and-release loop
+| Symbols/selectors in `index.html` | Responsibility |
+|---|---|
+| `.layout`, `.calc`, `.functionpanel`, media queries | Calculator-first responsive layout; preserve DOM/layout order. |
+| `FUNCS`, `parse`, `evaluate`, `callFn` | Real-valued grammar, numeric evaluation, function domains and RAD/DEG. |
+| `fmt`, `TRIG_AXIS_EPS` | Ten-significant-digit display and narrowly scoped trig normalization. |
+| `simplify`, `deriv`, `show` | Original supported symbolic derivatives and teaching steps. |
+| `compile`, `draw`, `roots`, `integral`, `slope` | Graphs, sampled rendering and numerical lab. |
+| `state`, `validateState`, `persist`, `exportWorkspace` | Active workspace, validation and autosave/export. |
+| `HELP`, `LESSONS`, `learning`, `teach` | Built-in control help and 13-lesson course. |
+| `memory`, `crawlLocal`, `rankPages`, `recallPages` | Bounded local recall index, personal pages and recent records. |
+| `MRE_FUNCTIONS`, `MRE_TOPICS`, `mreTutor` | 25 function/operator references and 19 base topic lessons. CAS adds 18 `cas ...` topic entries at startup. |
+| `mrePractice`, `mreTestRecords`, `mreBenchmarkExplanation` | Tab-local practice and imported benchmark explanations. |
+| `CAS_ENGINE_SOURCE`, `casKernel`, `casCompute`, `casRun` | Bundled vendor engine, validation/wrappers, worker lifecycle, UI rendering. |
+| `CAS_OPERATIONS`, `mreTutorial*` | Shared 18-operation directory and guided tutorials. |
+| `MitchellTech`, `mtResponse`, `mtGraphInput` | Public local API 1.1.0, result envelopes and graph validation. |
 
-1. Edit the one-file app and preserve the self-contained `index.html` format.
-2. Add **a new, distinct math input or tutor question** for every behavior change; do not count an identical question twice. For mode-dependent tests, include RAD or DEG in its identity.
-3. Run all three Node commands, and inspect the unique runner's JSON plus exit code.
-4. Smoke-test the rendered page in browser widths around 390px and 1366px; verify actual text in the result box, not just toleranced floats.
-5. Verify localStorage behavior on the hosted origin and JSON portability on actual devices before describing those workflows as independently tested.
-6. Update `BENCHMARKS.md` with the tested revision, actual counts, and any known failures. Only then release to `main`.
+Most application code is readable inline. The minified `CAS_ENGINE_SOURCE` string
+is the vendor exception; avoid dumping that entire line when navigating source.
+The API exposes the existing engines rather than a second calculator.
 
-## Scope and honesty
+## Mathematical contracts
 
-This is a local-first scientific calculator and rules-based math tutor. An external AI can drive it through browser automation, but the page does not itself contain an LLM. Local browser state belongs to that browser and origin; moving devices requires a transferred backup, not merely a URL. Keeping this distinction in public documentation makes both the software and its benchmark numbers reproducible.
+- Numeric methods use JavaScript floating point, not arbitrary precision. Display rounding and numerical accuracy are separate.
+- RAD/DEG affects sine/cosine/tangent, inverse trig, `atan2`, and angular graph parameters. Trig-zero stabilization uses a radians-based threshold near exact axis multiples; do not globally round all small values to zero.
+- Tangent near odd quarter turns is undefined; retain the rejection rather than a misleading huge finite result. Large inputs already have range-reduction precision limits.
+- The original differentiator can simplify `x^x` to `x^x*(ln(x)+1)` on its real domain `x>0`; it must preserve domain restrictions. Its rule steps are distinct from CAS output.
+- Numerical integration uses a fixed 1,600-panel Simpson rule. Roots scan/refine real candidates; stationary points/intersections are bounded numerical searches, not completeness proofs.
+- CAS is a separate radians-only symbolic/complex engine. Some results are approximate, incomplete, or unevaluated. Keep original exclusions, branch/convergence caveats, candidate verification and the missing antiderivative `+ C` visible.
 
+## CAS and tutorial implementation
 
-## Mr. E teaching and benchmark imports
+`CAS_ENGINE_SOURCE` embeds the npm `nerdamer@1.1.13/all.min.js` distribution.
+Preserve its embedded MIT notice and [third-party notice](THIRD-PARTY-NOTICES.md).
+There is no runtime CDN fetch. `casKernel` is serialized into a disposable worker
+and must not close over page state. It adapts logarithm notation, validates the
+allowlist, and handles `system(...)` / `substitute(...)` wrappers. `rationalize`
+is deliberately not exposed as a denominator-rationalization lesson.
 
-`index.html` now contains `MRE_FUNCTIONS` (function reference), `MRE_TOPICS` (lessons), `mreGraphExplain`, `mrePracticeStart`, `mreBenchmarkExplanation`, and `mreTutor`. The older explicit command tutor is wrapped rather than replaced, keeping existing `solve`, `differentiate`, `integrate`, `plot`, and `recall` behavior. Maintain the app as a self-contained HTML file; imported benchmark JSON is read as local data only and has size, ID, and uniqueness checks. Keep answer rendering through `textContent`. Tests: `node tests/mr-e-checks.cjs`; documentation: [MR-E.md](MR-E.md).
+`casCompute` cancels prior work, creates/cleans up a Blob worker, and enforces an
+eight-second timeout. `casRun` adds UI rendering; direct `MitchellTech.cas()`
+returns the Promise result without rendering it. `CAS_OPERATIONS` is shared by
+the UI/tutorials; its `ilaplace` directory key uses engine command `ilt(...)`.
+Tutorial wording is authored guidance, not a generated derivation trace.
 
-## Embedded CAS and tutorial runner
+Mr. E wraps the original explicit tutor commands rather than replacing them.
+`askMrE('cas ...')` acknowledges an asynchronous UI operation; it does not return
+the computed CAS value. Use `await cas(...)` for programmatic results. Preserve
+rendering through text content and the distinct benchmark/notebook import paths.
 
-`CAS_ENGINE_SOURCE` contains the unmodified npm `nerdamer@1.1.13/all.min.js` encoded as a JavaScript string. Its MIT notice is embedded and repeated in THIRD-PARTY-NOTICES.md. Do not remove the notice. No runtime network request or package installation is needed. Application code remains readable outside that vendor string.
+## Persistence and compatibility
 
-`casKernel` is serialized into a disposable worker and must not close over page variables. It validates the input, adapts logarithm notation, and handles system/substitution wrappers. The engine's `rationalize` operation is deliberately not exposed; its semantics are unsuitable for a denominator-rationalization lesson. `casCompute` manages cancellation, cleanup and timeout; `casRun` renders via textContent. `CAS_OPERATIONS` is the shared UI/tutorial directory. Function tutorials use `MRE_FUNCTIONS`; topic and control tutorials reuse MRE_TOPICS and HELP. No generated text is presented as a symbolic derivation trace.
+Keep existing `parlour.*` storage keys and `parlour-notebook` version-one markers
+unless implementing a reviewed migration. Validate imported data and preserve
+older backups with optional learning/recall sections absent. Named snapshots,
+current workspace, recall data, and lesson progress are separate stores; CAS,
+practice, tutorial state, and imported benchmark records are transient. See
+[BACKUPS.md](BACKUPS.md) for exact contents/limits and replacement behavior.
 
-Run `node tests/cas-checks.cjs`, `node tests/mr-e-checks.cjs`, and existing regression suites. `node tests/cas-browser.cjs` additionally requires Playwright and Chromium; set CHROMIUM_EXECUTABLE to an installed browser if necessary. It checks local-file workers, cancellation, API, tutorial navigation, function coverage and narrow/wide layouts without external requests.
+Recall is weighted local word matching. It neither uses Combined MPLPB's sealed
+provenance engine nor verifies a personal claim or historical calculation. Do not
+describe local recall, lesson completion, or benchmark import as autonomous model
+training, external retrieval, or independent proof.
+
+## Edit and release
+
+1. Keep changes on a branch and preserve the one-file runtime.
+2. For behavior changes, add distinct relevant math/tutor cases; include mode in mode-dependent case identity. Do not inflate uniqueness by counting repeated expressions.
+3. Run the relevant checks and the complete [eight-suite Node sequence](TESTING.md). Inspect generated failures and restore historical report artifacts rather than committing them accidentally.
+4. Run available real-browser tests and check local-file versus hosted operation, workers, mobile/desktop layout, persistence after actual reload, and export/import. State unavailable checks explicitly.
+5. Update the relevant guides and append dated evidence with the tested commit/HTML digest to [BENCHMARKS.md](BENCHMARKS.md). Runner counts overlap; do not add them into one unique total.
+6. Open a PR. After review/merge, compare the deployed HTML to the tested source and exercise the hosted page separately before claiming deployed-browser verification.
+
+Any static host can serve the root `index.html`. For branch-based GitHub Pages,
+publish **main / (root)**; there is no build output directory. The added
+[validation workflow](.github/workflows/calculator-checks.yml) installs its own
+test-only Playwright/Chromium and runs the Node/browser suites. This validation
+job is separate from Pages hosting; it does not configure branch protection or
+prove a deployed site passed. See [testing](TESTING.md) for installation and scope.
+
+The V120.2 app label, API 1.1.0, vendor version, and notebook version are separate.
+Record source commits and hashes for reproducibility rather than treating the
+repository name as a build identifier.
